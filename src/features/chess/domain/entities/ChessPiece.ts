@@ -15,3 +15,8 @@ export type ChessPiece = {
   row: number;
   column: number;
 };
+
+export type BoardPosition = {
+  row: number;
+  column: number;
+};
