@@ -42,7 +42,10 @@
 //   );
 // }
 
-import { ChessPiece } from "@/features/chess/domain/entities/ChessPiece";
+import {
+    BoardPosition,
+    ChessPiece,
+} from "@/features/chess/domain/entities/ChessPiece";
 import ChessPieceIcon from "@/features/chess/presentation/components/ChessPieceIcon";
 import React from "react";
 import { Pressable, View, useWindowDimensions } from "react-native";
@@ -53,10 +56,8 @@ const MAX_BOARD_SIZE = 520;
 
 type ChessBoardProps = {
     pieces: ChessPiece[];
-    selectedSquare: {
-        row: number;
-        column: number;
-    } | null;
+    selectedSquare: BoardPosition | null;
+    validMoves: BoardPosition[];
     onSquarePress: (row: number, column: number) => void;
 };
 
@@ -64,6 +65,7 @@ export function ChessBoard({
     pieces,
     selectedSquare,
     onSquarePress,
+    validMoves,
 }: ChessBoardProps) {
     const { width } = useWindowDimensions();
 
@@ -94,34 +96,75 @@ export function ChessBoard({
                     selectedSquare?.row === row &&
                     selectedSquare?.column === column;
 
+                const isValidMove = validMoves.some(
+                    (move) => move.row === row && move.column === column,
+                );
                 const piece = pieces.find(
                     (item) => item.row === row && item.column === column,
                 );
 
                 return (
+                    // <Pressable
+                    //     key={`${row}-${column}`}
+                    //     onPress={() => onSquarePress(row, column)}
+                    //     style={{
+                    //         width: squareSize,
+                    //         height: squareSize,
+                    //         alignItems: "center",
+                    //         justifyContent: "center",
+                    //         backgroundColor: isSelected
+                    //             ? "#FACC15"
+                    //             : isValidMove
+                    //               ? "#86EFAC"
+                    //               : isLightSquare
+                    //                 ? "#F0D9B5"
+                    //                 : "#B58863",
+                    //     }}
+                    // >
+                    //     {piece && (
+                    //         <ChessPieceIcon
+                    //             type={piece.type}
+                    //             color={piece.color}
+                    //             size={squareSize * 0.72}
+                    //         />
+                    //     )}
+                    // </Pressable>
                     <Pressable
-                        key={`${row}-${column}`}
-                        onPress={() => onSquarePress(row, column)}
-                        style={{
-                            width: squareSize,
-                            height: squareSize,
-                            alignItems: "center",
-                            justifyContent: "center",
-                            backgroundColor: isSelected
-                                ? "#FACC15"
-                                : isLightSquare
-                                  ? "#F0D9B5"
-                                  : "#B58863",
-                        }}
-                    >
-                        {piece && (
-                            <ChessPieceIcon
-                                type={piece.type}
-                                color={piece.color}
-                                size={squareSize * 0.72}
-                            />
-                        )}
-                    </Pressable>
+  key={`${row}-${column}`}
+  onPress={() => onSquarePress(row, column)}
+  style={{
+    width: squareSize,
+    height: squareSize,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: isSelected
+      ? "#FACC15"
+      : isLightSquare
+        ? "#F0D9B5"
+        : "#B58863",
+  }}
+>
+  {isValidMove && (
+    <View
+      pointerEvents="none"
+      style={{
+        position: "absolute",
+        width: squareSize * 0.28,
+        height: squareSize * 0.28,
+        borderRadius: squareSize * 0.14,
+        backgroundColor: "rgba(34, 197, 94, 0.45)",
+      }}
+    />
+  )}
+
+  {piece && (
+    <ChessPieceIcon
+      type={piece.type}
+      color={piece.color}
+      size={squareSize * 0.72}
+    />
+  )}
+</Pressable>
                 );
             })}
         </View>
