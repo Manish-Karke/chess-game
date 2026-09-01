@@ -8,6 +8,7 @@ import { getPawnValidMoves } from "../rules/getPawnValidMoves";
 import { getKnightValidMoves } from "../rules/getKnightValidMoves";
 import { GetRookValidMoves } from "../rules/getRookValidMoves";
 import { GetBishopValidMoves } from "../rules/getBishopValidMoves";
+import { getQueenValidMoves } from "../rules/getQueenValidMoves";
 
 export class GetValidMovesUseCaseImpl implements GetValidMovesUseCase {
     execute({ piece, pieces }: GetValidMovesInput): BoardPosition[] {
@@ -36,6 +37,11 @@ export class GetValidMovesUseCaseImpl implements GetValidMovesUseCase {
                     pieces,
                 });
 
+            case "queen":
+                return getQueenValidMoves({
+                    piece,
+                    pieces,
+                });
             default:
                 return [];
         }
