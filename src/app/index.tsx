@@ -1,11 +1,11 @@
-import { View, Text } from 'react-native';
+import { ChessBoard } from '@/components/chessBoard';
+import React from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function Index() {
+export default function HomeScreen() {
   return (
-    <View className="flex-1 items-center justify-center bg-white">
-      <Text className="text-3xl font-bold text-red-500">
-        NativeWind Working
-      </Text>
-    </View>
+    <SafeAreaView className="flex-1 items-center justify-center bg-white">
+      <ChessBoard />
+    </SafeAreaView>
   );
 }
