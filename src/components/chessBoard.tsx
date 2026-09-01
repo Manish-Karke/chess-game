@@ -42,16 +42,29 @@
 //   );
 // }
 
-import { initialChessPieces } from "@/features/chess/domain/constants/initialChessPieces";
+import { ChessPiece } from "@/features/chess/domain/entities/ChessPiece";
 import ChessPieceIcon from "@/features/chess/presentation/components/ChessPieceIcon";
 import React from "react";
-import { View, useWindowDimensions } from "react-native";
+import { Pressable, View, useWindowDimensions } from "react-native";
 
 const BOARD_DIMENSION = 8;
 const HORIZONTAL_PADDING = 16;
 const MAX_BOARD_SIZE = 520;
 
-export function ChessBoard() {
+type ChessBoardProps = {
+    pieces: ChessPiece[];
+    selectedSquare: {
+        row: number;
+        column: number;
+    } | null;
+    onSquarePress: (row: number, column: number) => void;
+};
+
+export function ChessBoard({
+    pieces,
+    selectedSquare,
+    onSquarePress,
+}: ChessBoardProps) {
     const { width } = useWindowDimensions();
 
     const availableWidth = width - HORIZONTAL_PADDING * 2;
@@ -77,21 +90,28 @@ export function ChessBoard() {
 
                 const isLightSquare = (row + column) % 2 === 0;
 
-                const piece = initialChessPieces.find(
+                const isSelected =
+                    selectedSquare?.row === row &&
+                    selectedSquare?.column === column;
+
+                const piece = pieces.find(
                     (item) => item.row === row && item.column === column,
                 );
 
                 return (
-                    <View
+                    <Pressable
                         key={`${row}-${column}`}
+                        onPress={() => onSquarePress(row, column)}
                         style={{
                             width: squareSize,
                             height: squareSize,
                             alignItems: "center",
                             justifyContent: "center",
-                            backgroundColor: isLightSquare
-                                ? "#F0D9B5"
-                                : "#B58863",
+                            backgroundColor: isSelected
+                                ? "#FACC15"
+                                : isLightSquare
+                                  ? "#F0D9B5"
+                                  : "#B58863",
                         }}
                     >
                         {piece && (
@@ -101,7 +121,7 @@ export function ChessBoard() {
                                 size={squareSize * 0.72}
                             />
                         )}
-                    </View>
+                    </Pressable>
                 );
             })}
         </View>
