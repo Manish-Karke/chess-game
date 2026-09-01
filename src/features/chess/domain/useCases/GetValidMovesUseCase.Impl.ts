@@ -5,6 +5,7 @@ import {
 
 import { BoardPosition } from "../entities/ChessPiece";
 import { getPawnValidMoves } from "../rules/getPawnValidMoves";
+import { getKnightValidMoves } from "../rules/getKnightValidMoves";
 
 export class GetValidMovesUseCaseImpl
   implements GetValidMovesUseCase
@@ -19,6 +20,12 @@ export class GetValidMovesUseCaseImpl
           piece,
           pieces,
         });
+
+        case "knight":
+            return getKnightValidMoves({
+                piece,
+                pieces
+            })
 
       default:
         return [];

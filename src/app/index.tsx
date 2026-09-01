@@ -7,6 +7,8 @@ const chessFeature = createChessFeature();
 export default function HomeScreen() {
     const chessGame = useChessGameViewModel({
         getValidMovesUseCase: chessFeature.getValidMovesUseCase,
+         movePieceUseCase:
+        chessFeature.movePieceUseCase,
     });
     return (
         <SafeAreaView className="flex-1 items-center justify-center bg-white">

@@ -1,8 +1,10 @@
+// MovePieceUseCase.ts
+
 import { BoardPosition, ChessPiece } from "../entities/ChessPiece";
 
 export type MovePieceInput = {
     pieces: ChessPiece[];
-    placeId: string;
+    pieceId: string;
     target: BoardPosition;
 };
 

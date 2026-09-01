@@ -1,7 +1,16 @@
 import { GetValidMovesUseCaseImpl } from "../domain/useCases/GetValidMovesUseCase.Impl";
+import { MovePieceUseCaseImpl } from "../domain/useCases/MovePieceUseCase.Impl";
+
 
 export function createChessFeature() {
-  return {
-    getValidMovesUseCase: new GetValidMovesUseCaseImpl(),
-  };
+    const getValidMovesUseCase =
+        new GetValidMovesUseCaseImpl();
+
+    const movePieceUseCase =
+        new MovePieceUseCaseImpl();
+
+    return {
+        getValidMovesUseCase,
+        movePieceUseCase,
+    };
 }
