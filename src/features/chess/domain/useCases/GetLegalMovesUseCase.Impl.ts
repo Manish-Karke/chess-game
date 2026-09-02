@@ -1,6 +1,10 @@
 // domain/useCases/GetLegalMovesUseCaseImpl.ts
 
 import { BoardPosition } from "../entities/ChessPiece";
+
+import { getCastlingMoves } from "../rules/getCastlingMoves";
+import { getEnPassantMoves } from "../rules/getEnPassantMoves";
+
 import { IsKingInCheck } from "../rules/iskingInCheck";
 import { simulateMove } from "../rules/simulateMove";
 
@@ -14,11 +18,34 @@ import { GetValidMovesUseCase } from "./GetValidMovesUseCase";
 export class GetLegalMovesUseCaseImpl implements GetLegalMovesUseCase {
     constructor(private readonly getValidMovesUseCase: GetValidMovesUseCase) {}
 
-    execute({ piece, pieces }: GetLegalMovesInput): BoardPosition[] {
-        const candidateMoves = this.getValidMovesUseCase.execute({
+    execute({ piece, pieces, lastMove }: GetLegalMovesInput): BoardPosition[] {
+        const normalMoves = this.getValidMovesUseCase.execute({
             piece,
             pieces,
         });
+
+        const castlingMoves =
+            piece.type === "king"
+                ? getCastlingMoves({
+                      piece,
+                      pieces,
+                  })
+                : [];
+
+        const enPassantMoves =
+            piece.type === "pawn"
+                ? getEnPassantMoves({
+                      piece,
+                      pieces,
+                      lastMove,
+                  })
+                : [];
+
+        const candidateMoves = [
+            ...normalMoves,
+            ...castlingMoves,
+            ...enPassantMoves,
+        ];
 
         return candidateMoves.filter((target) => {
             const targetPiece = pieces.find(
@@ -26,8 +53,7 @@ export class GetLegalMovesUseCaseImpl implements GetLegalMovesUseCase {
                     item.row === target.row && item.column === target.column,
             );
 
-            // A king can be attacked/checkmated,
-            // but never captured.
+            // King can never be captured.
             if (targetPiece?.type === "king") {
                 return false;
             }
@@ -36,14 +62,15 @@ export class GetLegalMovesUseCaseImpl implements GetLegalMovesUseCase {
                 pieces,
                 pieceId: piece.id,
                 target,
+                lastMove,
             });
 
-            const leavesKingInCheck = IsKingInCheck({
+            const kingStillInCheck = IsKingInCheck({
                 color: piece.color,
                 pieces: simulatedPieces,
             });
 
-            return !leavesKingInCheck;
+            return !kingStillInCheck;
         });
     }
 }

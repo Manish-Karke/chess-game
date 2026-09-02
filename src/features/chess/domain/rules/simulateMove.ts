@@ -1,34 +1,28 @@
-import { BoardPosition, ChessPiece } from "../entities/ChessPiece";
+import {
+    BoardPosition,
+    ChessMove,
+    ChessPiece,
+} from "../entities/ChessPiece";
+
+import { applyMoveToPieces } from "../useCases/applyMoveToPieces";
 
 type SimulateMoveInput = {
     pieces: ChessPiece[];
     pieceId: string;
     target: BoardPosition;
+    lastMove: ChessMove | null;
 };
 
 export function simulateMove({
     pieces,
     pieceId,
     target,
+    lastMove,
 }: SimulateMoveInput): ChessPiece[] {
-    return pieces
-        .filter((piece) => {
-            const isTargetPiece =
-                piece.row === target.row && piece.column === target.column;
-
-            if (!isTargetPiece) {
-                return true;
-            }
-            // Keep the moving piece if for some reason it is target
-            return piece.id === pieceId;
-        })
-        .map((piece) =>
-            piece.id === pieceId
-                ? {
-                      ...piece,
-                      row: target.row,
-                      column: target.column,
-                  }
-                : piece,
-        );
+    return applyMoveToPieces({
+        pieces,
+        pieceId,
+        target,
+        lastMove,
+    });
 }
