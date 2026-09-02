@@ -1,4 +1,5 @@
 import { ChessBoard } from "@/components/chessBoard";
+import { PlayerMaterialBar } from "@/components/PlayerMaterialBar";
 import { createChessFeature } from "@/features/chess/hooks/createChessFeature";
 
 import { GameControls } from "@/features/chess/presentation/components/GameControl";
@@ -23,22 +24,39 @@ export default function HomeScreen() {
     });
 
     return (
-        <SafeAreaView className="flex-1 bg-white">
-            <View className="flex-1 items-center justify-center">
+        <SafeAreaView className="flex-1 bg-neutral-400">
+            <View
+                style={{
+                    flex: 1,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    paddingHorizontal: 16,
+                }}
+            >
                 <GameControls
                     currentTurn={chessGame.currentTurn}
                     onRestart={chessGame.resetGame}
                 />
+
+                {/* BLACK PLAYER */}
+                <PlayerMaterialBar
+                    color="black"
+                    score={chessGame.blackScore}
+                    capturedPieces={chessGame.piecesCapturedByBlack}
+                    isCurrentTurn={chessGame.currentTurn === "black"}
+                />
+
+                {/* BOARD */}
                 <View
                     style={{
                         borderRadius: 12,
 
-                        shadowColor: "#00000",
+                        shadowColor: "#000",
                         shadowOffset: {
                             width: 0,
-                            height: 12,
+                            height: 8,
                         },
-                        shadowOpacity: 1,
+                        shadowOpacity: 0.25,
                         shadowRadius: 10,
 
                         elevation: 10,
@@ -49,10 +67,19 @@ export default function HomeScreen() {
                         selectedSquare={chessGame.selectedSquare}
                         validMoves={chessGame.validMoves}
                         checkedKingPosition={chessGame.checkedKingPosition}
+                        lastMove={chessGame.lastMove}
                         onSquarePress={chessGame.handleSquarePress}
                     />
                 </View>
-                {/* Pawn promotion */}
+
+                {/* WHITE PLAYER */}
+                <PlayerMaterialBar
+                    color="white"
+                    score={chessGame.whiteScore}
+                    capturedPieces={chessGame.piecesCapturedByWhite}
+                    isCurrentTurn={chessGame.currentTurn === "white"}
+                />
+
                 {chessGame.pendingPromotion && (
                     <PromotionOverlay
                         color={chessGame.pendingPromotion.color}
@@ -60,7 +87,6 @@ export default function HomeScreen() {
                     />
                 )}
 
-                {/* Checkmate / stalemate */}
                 {(chessGame.gameStatus === "checkmate" ||
                     chessGame.gameStatus === "stalemate") && (
                     <GameOverOverlay

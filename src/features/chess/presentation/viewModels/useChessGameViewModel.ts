@@ -17,6 +17,9 @@ import {
     PromotePawnUseCase,
     PromotionPieceType,
 } from "../../domain/useCases/PromotePawnUseCase";
+import { calculateMaterialScore } from "../../domain/rules/calculateMaterialScore";
+import { getCapturedPieces } from "../../domain/rules/getCapturedPieces";
+import { PIECE_VALUES } from "../../domain/constants/pieceValues";
 
 export type ChessTurn = "white" | "black";
 
@@ -305,6 +308,46 @@ export function useChessGameViewModel({
 
         clearSelection();
     };
+    const materialState = useMemo(() => {
+    const piecesCapturedByWhite =
+        getCapturedPieces({
+            initialPieces: initialChessPieces,
+            currentPieces: pieces,
+
+            // White captures Black pieces
+            capturedColor: "black",
+        });
+
+    const piecesCapturedByBlack =
+        getCapturedPieces({
+            initialPieces: initialChessPieces,
+            currentPieces: pieces,
+
+            // Black captures White pieces
+            capturedColor: "white",
+        });
+
+    const whiteScore =
+        piecesCapturedByWhite.reduce(
+            (total, piece) =>
+                total + PIECE_VALUES[piece.type],
+            0,
+        );
+
+    const blackScore =
+        piecesCapturedByBlack.reduce(
+            (total, piece) =>
+                total + PIECE_VALUES[piece.type],
+            0,
+        );
+
+    return {
+        piecesCapturedByWhite,
+        piecesCapturedByBlack,
+        whiteScore,
+        blackScore,
+    };
+}, [pieces]);
 
     const resetGame = () => {
         setPieces(
@@ -325,7 +368,7 @@ export function useChessGameViewModel({
         selectedPieceId,
         validMoves,
         currentTurn,
-
+        lastMove,
         checkedKingPosition,
 
         gameStatus: gameState.status,
@@ -333,6 +376,17 @@ export function useChessGameViewModel({
 
         pendingPromotion,
 
+          piecesCapturedByWhite:
+        materialState.piecesCapturedByWhite,
+
+    piecesCapturedByBlack:
+        materialState.piecesCapturedByBlack,
+
+    whiteScore:
+        materialState.whiteScore,
+
+    blackScore:
+        materialState.blackScore,
         handleSquarePress,
         handlePromotion,
         resetGame,
