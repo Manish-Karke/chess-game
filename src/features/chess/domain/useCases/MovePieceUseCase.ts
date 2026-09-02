@@ -1,11 +1,15 @@
-// MovePieceUseCase.ts
+import {
+    BoardPosition,
+    ChessMove,
+    ChessPiece,
+} from "../entities/ChessPiece";
 
-import { BoardPosition, ChessPiece } from "../entities/ChessPiece";
 
 export type MovePieceInput = {
     pieces: ChessPiece[];
     pieceId: string;
     target: BoardPosition;
+    lastMove: ChessMove | null;
 };
 
 export interface MovePieceUseCase {

@@ -54,11 +54,13 @@ export class MovePieceUseCaseImpl
         pieces,
         pieceId,
         target,
+        lastMove
     }: MovePieceInput) {
         return applyMoveToPieces({
             pieces,
             pieceId,
             target,
+            lastMove
         });
     }
 }

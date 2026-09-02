@@ -1,4 +1,4 @@
-import { ChessPiece } from "../entities/ChessPiece";
+import { ChessMove, ChessPiece } from "../entities/ChessPiece";
 import { GetLegalMovesUseCase } from "../useCases/GetLegalMovesUseCase";
 import { IsKingInCheck } from "./iskingInCheck";
 
@@ -6,12 +6,14 @@ type IsStalemateInput = {
     color: ChessPiece["color"];
     pieces: ChessPiece[];
     getLegalMovesUseCase: GetLegalMovesUseCase;
+     lastMove: ChessMove | null;
 };
 
 export function IsStalemate({
     color,
     pieces,
     getLegalMovesUseCase,
+    lastMove
 }: IsStalemateInput): boolean {
     const inCheck = IsKingInCheck({
         color,
@@ -32,6 +34,7 @@ export function IsStalemate({
                 getLegalMovesUseCase.execute({
                     piece,
                     pieces,
+                    lastMove
                 });
 
             return legalMoves.length > 0;

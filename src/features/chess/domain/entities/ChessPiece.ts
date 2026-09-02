@@ -30,3 +30,13 @@ export type GameState = {
     status: GameStatus;
     winner: ChessTurn | null;
 };
+
+
+export type ChessMove = {
+    pieceId: string;
+    pieceType: ChessPiece["type"];
+    color: ChessPiece["color"];
+
+    from: BoardPosition;
+    to: BoardPosition;
+};

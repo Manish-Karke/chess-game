@@ -1,7 +1,10 @@
 // domain/useCases/GetLegalMovesUseCaseImpl.ts
 
 import { BoardPosition } from "../entities/ChessPiece";
+
 import { getCastlingMoves } from "../rules/getCastlingMoves";
+import { getEnPassantMoves } from "../rules/getEnPassantMoves";
+
 import { IsKingInCheck } from "../rules/iskingInCheck";
 import { simulateMove } from "../rules/simulateMove";
 
@@ -15,7 +18,7 @@ import { GetValidMovesUseCase } from "./GetValidMovesUseCase";
 export class GetLegalMovesUseCaseImpl implements GetLegalMovesUseCase {
     constructor(private readonly getValidMovesUseCase: GetValidMovesUseCase) {}
 
-    execute({ piece, pieces }: GetLegalMovesInput): BoardPosition[] {
+    execute({ piece, pieces, lastMove }: GetLegalMovesInput): BoardPosition[] {
         const normalMoves = this.getValidMovesUseCase.execute({
             piece,
             pieces,
@@ -29,7 +32,20 @@ export class GetLegalMovesUseCaseImpl implements GetLegalMovesUseCase {
                   })
                 : [];
 
-        const candidateMoves = [...normalMoves, ...castlingMoves];
+        const enPassantMoves =
+            piece.type === "pawn"
+                ? getEnPassantMoves({
+                      piece,
+                      pieces,
+                      lastMove,
+                  })
+                : [];
+
+        const candidateMoves = [
+            ...normalMoves,
+            ...castlingMoves,
+            ...enPassantMoves,
+        ];
 
         return candidateMoves.filter((target) => {
             const targetPiece = pieces.find(
@@ -37,6 +53,7 @@ export class GetLegalMovesUseCaseImpl implements GetLegalMovesUseCase {
                     item.row === target.row && item.column === target.column,
             );
 
+            // King can never be captured.
             if (targetPiece?.type === "king") {
                 return false;
             }
@@ -45,6 +62,7 @@ export class GetLegalMovesUseCaseImpl implements GetLegalMovesUseCase {
                 pieces,
                 pieceId: piece.id,
                 target,
+                lastMove,
             });
 
             const kingStillInCheck = IsKingInCheck({

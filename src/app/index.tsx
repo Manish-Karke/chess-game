@@ -1,7 +1,10 @@
 import { ChessBoard } from "@/components/chessBoard";
 import { createChessFeature } from "@/features/chess/hooks/createChessFeature";
+
 import { GameControls } from "@/features/chess/presentation/components/GameControl";
 import { GameOverOverlay } from "@/features/chess/presentation/components/GameOverOverlay";
+import { PromotionOverlay } from "@/features/chess/presentation/components/PromotionOverlay";
+
 import { useChessGameViewModel } from "@/features/chess/presentation/viewModels/useChessGameViewModel";
 
 import React from "react";
@@ -12,8 +15,14 @@ const chessFeature = createChessFeature();
 
 export default function HomeScreen() {
     const chessGame = useChessGameViewModel({
-        getLegalMovesUseCase: chessFeature.getLegalMovesUseCase,
-        movePieceUseCase: chessFeature.movePieceUseCase,
+        getLegalMovesUseCase:
+            chessFeature.getLegalMovesUseCase,
+
+        movePieceUseCase:
+            chessFeature.movePieceUseCase,
+
+        promotePawnUseCase:
+            chessFeature.promotePawnUseCase,
     });
 
     return (
@@ -28,12 +37,31 @@ export default function HomeScreen() {
                     pieces={chessGame.pieces}
                     selectedSquare={chessGame.selectedSquare}
                     validMoves={chessGame.validMoves}
-                    checkedKingPosition={chessGame.checkedKingPosition}
-                    onSquarePress={chessGame.handleSquarePress}
+                    checkedKingPosition={
+                        chessGame.checkedKingPosition
+                    }
+                    onSquarePress={
+                        chessGame.handleSquarePress
+                    }
                 />
 
-                {(chessGame.gameStatus === "checkmate" ||
-                    chessGame.gameStatus === "stalemate") && (
+                {/* Pawn promotion */}
+                {chessGame.pendingPromotion && (
+                    <PromotionOverlay
+                        color={
+                            chessGame.pendingPromotion.color
+                        }
+                        onSelect={
+                            chessGame.handlePromotion
+                        }
+                    />
+                )}
+
+                {/* Checkmate / stalemate */}
+                {(
+                    chessGame.gameStatus === "checkmate" ||
+                    chessGame.gameStatus === "stalemate"
+                ) && (
                     <GameOverOverlay
                         result={chessGame.gameStatus}
                         winner={chessGame.winner}
