@@ -1,22 +1,31 @@
 export type ChessPieceType =
-  | 'king'
-  | 'queen'
-  | 'rook'
-  | 'bishop'
-  | 'knight'
-  | 'pawn';
+    | "king"
+    | "queen"
+    | "rook"
+    | "bishop"
+    | "knight"
+    | "pawn";
 
-export type ChessPieceColor = 'white' | 'black';
+export type ChessPieceColor = "white" | "black";
 
 export type ChessPiece = {
-  id: string;
-  type: ChessPieceType;
-  color: ChessPieceColor;
-  row: number;
-  column: number;
+    id: string;
+    type: ChessPieceType;
+    color: ChessPieceColor;
+    row: number;
+    column: number;
 };
 
+export type GameStatus = "playing" | "check" | "checkmate" | "stalemate";
+
+export type Winner = "white" | "black" | null;
+
 export type BoardPosition = {
-  row: number;
-  column: number;
+    row: number;
+    column: number;
+};
+export type ChessTurn = "white" | "black";
+export type GameState = {
+    status: GameStatus;
+    winner: ChessTurn | null;
 };

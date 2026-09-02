@@ -1,11 +1,16 @@
 import { useMemo, useState } from "react";
 
 import { initialChessPieces } from "../../domain/constants/initialChessPieces";
-import { BoardPosition, ChessPiece } from "../../domain/entities/ChessPiece";
+import {
+    BoardPosition,
+    ChessPiece,
+    GameState,
+} from "../../domain/entities/ChessPiece";
 
 import { GetLegalMovesUseCase } from "../../domain/useCases/GetLegalMovesUseCase";
 import { MovePieceUseCase } from "../../domain/useCases/MovePieceUseCase";
 import { IsKingInCheck } from "../../domain/rules/iskingInCheck";
+import { isCheckmate } from "../../domain/rules/isCheckmate";
 
 export type ChessTurn = "white" | "black";
 
@@ -52,7 +57,84 @@ export function useChessGameViewModel({
         setValidMoves(moves);
     };
 
+    const checkedKingPosition = useMemo<BoardPosition | null>(() => {
+        const whiteInCheck = IsKingInCheck({
+            color: "white",
+            pieces,
+        });
+
+        if (whiteInCheck) {
+            const whiteKing = pieces.find(
+                (piece) => piece.type === "king" && piece.color === "white",
+            );
+
+            if (whiteKing) {
+                return {
+                    row: whiteKing.row,
+                    column: whiteKing.column,
+                };
+            }
+        }
+
+        const blackInCheck = IsKingInCheck({
+            color: "black",
+            pieces,
+        });
+
+        if (blackInCheck) {
+            const blackKing = pieces.find(
+                (piece) => piece.type === "king" && piece.color === "black",
+            );
+
+            if (blackKing) {
+                return {
+                    row: blackKing.row,
+                    column: blackKing.column,
+                };
+            }
+        }
+
+        return null;
+    }, [pieces]);
+
+   const gameState = useMemo<GameState>(() => {
+        const currentPlayerCheckmate = isCheckmate({
+            color: currentTurn,
+            pieces,
+            getLegalMovesUseCase,
+        });
+
+        if (currentPlayerCheckmate) {
+            const winner: ChessTurn =
+                currentTurn === "white" ? "black" : "white";
+
+            return {
+                status: "checkmate",
+                winner,
+            };
+        }
+
+        const currentPlayerInCheck = IsKingInCheck({
+            color: currentTurn,
+            pieces,
+        });
+
+        if (currentPlayerInCheck) {
+            return {
+                status: "check",
+                winner: null,
+            };
+        }
+
+        return {
+            status: "playing",
+            winner: null,
+        };
+    }, [pieces, currentTurn, getLegalMovesUseCase]);
     const handleSquarePress = (row: number, column: number) => {
+        if (gameState.status === "checkmate") {
+            return;
+        }
         const piece = pieces.find(
             (item) => item.row === row && item.column === column,
         );
@@ -111,46 +193,13 @@ export function useChessGameViewModel({
         clearSelection();
     };
 
-    const checkedKingPosition = useMemo<BoardPosition | null>(() => {
-        const whiteInCheck = IsKingInCheck({
-            color: "white",
-            pieces,
-        });
+    const resetGame = () => {
+        setPieces(initialChessPieces);
 
-        if (whiteInCheck) {
-            const whiteKing = pieces.find(
-                (piece) => piece.type === "king" && piece.color === "white",
-            );
+        setCurrentTurn("white");
 
-            if (whiteKing) {
-                return {
-                    row: whiteKing.row,
-                    column: whiteKing.column,
-                };
-            }
-        }
-
-        const blackInCheck = IsKingInCheck({
-            color: "black",
-            pieces,
-        });
-
-        if (blackInCheck) {
-            const blackKing = pieces.find(
-                (piece) => piece.type === "king" && piece.color === "black",
-            );
-
-            if (blackKing) {
-                return {
-                    row: blackKing.row,
-                    column: blackKing.column,
-                };
-            }
-        }
-
-        return null;
-    }, [pieces]);
-
+        clearSelection();
+    };
     return {
         pieces,
         selectedSquare,
@@ -158,6 +207,9 @@ export function useChessGameViewModel({
         validMoves,
         currentTurn,
         checkedKingPosition,
+        gameStatus: gameState.status,
+        winner: gameState.winner,
         handleSquarePress,
+        resetGame,
     };
 }

@@ -1,26 +1,60 @@
 import { ChessBoard } from "@/components/chessBoard";
 import { createChessFeature } from "@/features/chess/hooks/createChessFeature";
+import { GameControls } from "@/features/chess/presentation/components/GameControl";
+import { GameOverOverlay } from "@/features/chess/presentation/components/GameOverOverlay";
 import { useChessGameViewModel } from "@/features/chess/presentation/viewModels/useChessGameViewModel";
+
 import React from "react";
+import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
 const chessFeature = createChessFeature();
+
 export default function HomeScreen() {
     const chessGame = useChessGameViewModel({
         getLegalMovesUseCase:
-        chessFeature.getLegalMovesUseCase,
-        movePieceUseCase: chessFeature.movePieceUseCase,
+            chessFeature.getLegalMovesUseCase,
+        movePieceUseCase:
+            chessFeature.movePieceUseCase,
     });
-    return (
-        <SafeAreaView className="flex-1 items-center justify-center bg-white">
-            {/* i think this should be passed from the hook */}
 
-            <ChessBoard
-                pieces={chessGame.pieces}
-                selectedSquare={chessGame.selectedSquare}
-                validMoves={chessGame.validMoves}
-                checkedKingPosition={chessGame.checkedKingPosition}
-                onSquarePress={chessGame.handleSquarePress}
-            />
+    return (
+        <SafeAreaView className="flex-1 bg-white">
+            <View className="flex-1 items-center justify-center">
+                <GameControls
+                    currentTurn={chessGame.currentTurn}
+                    onRestart={chessGame.resetGame}
+                />
+
+                <ChessBoard
+                    pieces={chessGame.pieces}
+                    selectedSquare={
+                        chessGame.selectedSquare
+                    }
+                    validMoves={
+                        chessGame.validMoves
+                    }
+                    checkedKingPosition={
+                        chessGame.checkedKingPosition
+                    }
+                    onSquarePress={
+                        chessGame.handleSquarePress
+                    }
+                />
+
+                {chessGame.gameStatus ===
+                    "checkmate" &&
+                    chessGame.winner && (
+                        <GameOverOverlay
+                            winner={
+                                chessGame.winner
+                            }
+                            onNewGame={
+                                chessGame.resetGame
+                            }
+                        />
+                    )}
+            </View>
         </SafeAreaView>
     );
 }
