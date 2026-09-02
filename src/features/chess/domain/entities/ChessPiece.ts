@@ -40,3 +40,7 @@ export type ChessMove = {
     from: BoardPosition;
     to: BoardPosition;
 };
+
+export type ChessGameMode =
+    | "local"
+    | "computer";   

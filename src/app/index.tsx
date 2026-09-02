@@ -1,100 +1,131 @@
-import { ChessBoard } from "@/components/chessBoard";
-import { PlayerMaterialBar } from "@/components/PlayerMaterialBar";
-import { createChessFeature } from "@/features/chess/hooks/createChessFeature";
-
-import { GameControls } from "@/features/chess/presentation/components/GameControl";
-import { GameOverOverlay } from "@/features/chess/presentation/components/GameOverOverlay";
-import { PromotionOverlay } from "@/features/chess/presentation/components/PromotionOverlay";
-
-import { useChessGameViewModel } from "@/features/chess/presentation/viewModels/useChessGameViewModel";
-
+import { router } from "expo-router";
 import React from "react";
-import { View } from "react-native";
+import {
+    Pressable,
+    Text,
+    View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const chessFeature = createChessFeature();
-
 export default function HomeScreen() {
-    const chessGame = useChessGameViewModel({
-        getLegalMovesUseCase: chessFeature.getLegalMovesUseCase,
+    const handleTwoPlayerGame = () => {
+        router.push({
+            pathname: "./game",
+            params: {
+                mode: "local",
+            },
+        });
+    };
 
-        movePieceUseCase: chessFeature.movePieceUseCase,
-
-        promotePawnUseCase: chessFeature.promotePawnUseCase,
-    });
+    const handleComputerGame = () => {
+        router.push({
+            pathname: "./game",
+            params: {
+                mode: "computer",
+            },
+        });
+    };
 
     return (
-        <SafeAreaView className="flex-1 bg-neutral-400">
+        <SafeAreaView className="flex-1 bg-neutral-900">
             <View
                 style={{
                     flex: 1,
-                    alignItems: "center",
                     justifyContent: "center",
-                    paddingHorizontal: 16,
+                    paddingHorizontal: 24,
                 }}
             >
-                <GameControls
-                    currentTurn={chessGame.currentTurn}
-                    onRestart={chessGame.resetGame}
-                />
-
-                {/* BLACK PLAYER */}
-                <PlayerMaterialBar
-                    color="black"
-                    score={chessGame.blackScore}
-                    capturedPieces={chessGame.piecesCapturedByBlack}
-                    isCurrentTurn={chessGame.currentTurn === "black"}
-                />
-
-                {/* BOARD */}
                 <View
                     style={{
-                        borderRadius: 12,
-
-                        shadowColor: "#000",
-                        shadowOffset: {
-                            width: 0,
-                            height: 8,
-                        },
-                        shadowOpacity: 0.25,
-                        shadowRadius: 10,
-
-                        elevation: 10,
+                        marginBottom: 40,
                     }}
                 >
-                    <ChessBoard
-                        pieces={chessGame.pieces}
-                        selectedSquare={chessGame.selectedSquare}
-                        validMoves={chessGame.validMoves}
-                        checkedKingPosition={chessGame.checkedKingPosition}
-                        lastMove={chessGame.lastMove}
-                        onSquarePress={chessGame.handleSquarePress}
-                    />
+                    <Text
+                        style={{
+                            fontSize: 40,
+                            fontWeight: "900",
+                            color: "#FFFFFF",
+                        }}
+                    >
+                        Chess
+                    </Text>
+
+                    <Text
+                        style={{
+                            marginTop: 8,
+                            fontSize: 16,
+                            color: "#A3A3A3",
+                        }}
+                    >
+                        Choose how you want to play
+                    </Text>
                 </View>
 
-                {/* WHITE PLAYER */}
-                <PlayerMaterialBar
-                    color="white"
-                    score={chessGame.whiteScore}
-                    capturedPieces={chessGame.piecesCapturedByWhite}
-                    isCurrentTurn={chessGame.currentTurn === "white"}
-                />
+                <View
+                    style={{
+                        gap: 16,
+                    }}
+                >
+                    <Pressable
+                        onPress={handleTwoPlayerGame}
+                        style={{
+                            padding: 20,
+                            borderRadius: 16,
+                            backgroundColor: "#FFFFFF",
+                        }}
+                    >
+                        <Text
+                            style={{
+                                fontSize: 20,
+                                fontWeight: "800",
+                                color: "#111827",
+                            }}
+                        >
+                            Two Players
+                        </Text>
 
-                {chessGame.pendingPromotion && (
-                    <PromotionOverlay
-                        color={chessGame.pendingPromotion.color}
-                        onSelect={chessGame.handlePromotion}
-                    />
-                )}
+                        <Text
+                            style={{
+                                marginTop: 6,
+                                fontSize: 14,
+                                color: "#6B7280",
+                            }}
+                        >
+                            Play locally with another player
+                        </Text>
+                    </Pressable>
 
-                {(chessGame.gameStatus === "checkmate" ||
-                    chessGame.gameStatus === "stalemate") && (
-                    <GameOverOverlay
-                        result={chessGame.gameStatus}
-                        winner={chessGame.winner}
-                        onNewGame={chessGame.resetGame}
-                    />
-                )}
+                    <Pressable
+                        onPress={handleComputerGame}
+                        style={{
+                            padding: 20,
+                            borderRadius: 16,
+                            backgroundColor: "#262626",
+                            borderWidth: 1,
+                            borderColor: "#404040",
+                        }}
+                    >
+                        <Text
+                            style={{
+                                fontSize: 20,
+                                fontWeight: "800",
+                                color: "#FFFFFF",
+                            }}
+                        >
+                            Play With Computer
+                        </Text>
+
+                        <Text
+                            style={{
+                                marginTop: 6,
+                                fontSize: 14,
+                                color: "#A3A3A3",
+                            }}
+                        >
+                            Challenge the computer
+                        </Text>
+                    </Pressable>
+                </View>
             </View>
         </SafeAreaView>
     );
