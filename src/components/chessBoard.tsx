@@ -1,47 +1,3 @@
-// import React from 'react';
-// import { View, useWindowDimensions } from 'react-native';
-
-// const BOARD_SIZE = 8;
-
-// export function ChessBoard() {
-//   const { width } = useWindowDimensions();
-
-//   const horizontalPadding = 16;
-//   const boardSize = width - horizontalPadding * 2;
-//   const squareSize = boardSize / BOARD_SIZE;
-
-//   const squares = Array.from({ length: BOARD_SIZE * BOARD_SIZE });
-
-//   return (
-//     <View
-//       style={{
-//         width: boardSize,
-//         height: boardSize,
-//         flexDirection: 'row',
-//         flexWrap: 'wrap',
-//       }}
-//     >
-//       {squares.map((_, index) => {
-//         const row = Math.floor(index / BOARD_SIZE);
-//         const column = index % BOARD_SIZE;
-
-//         const isLight = (row + column) % 2 === 0;
-
-//         return (
-//           <View
-//             key={index}
-//             style={{
-//               width: squareSize,
-//               height: squareSize,
-//               backgroundColor: isLight ? '#F0D9B5' : '#B58863',
-//             }}
-//           />
-//         );
-//       })}
-//     </View>
-//   );
-// }
-
 import {
     BoardPosition,
     ChessPiece,
@@ -59,6 +15,7 @@ type ChessBoardProps = {
     selectedSquare: BoardPosition | null;
     validMoves: BoardPosition[];
     onSquarePress: (row: number, column: number) => void;
+    checkedKingPosition: BoardPosition | null;
 };
 
 export function ChessBoard({
@@ -66,6 +23,7 @@ export function ChessBoard({
     selectedSquare,
     onSquarePress,
     validMoves,
+    checkedKingPosition,
 }: ChessBoardProps) {
     const { width } = useWindowDimensions();
 
@@ -102,69 +60,57 @@ export function ChessBoard({
                 const piece = pieces.find(
                     (item) => item.row === row && item.column === column,
                 );
-
+                const isKingInCheck =
+                    checkedKingPosition?.row === row &&
+                    checkedKingPosition?.column === column;
                 return (
-                    // <Pressable
-                    //     key={`${row}-${column}`}
-                    //     onPress={() => onSquarePress(row, column)}
-                    //     style={{
-                    //         width: squareSize,
-                    //         height: squareSize,
-                    //         alignItems: "center",
-                    //         justifyContent: "center",
-                    //         backgroundColor: isSelected
-                    //             ? "#FACC15"
-                    //             : isValidMove
-                    //               ? "#86EFAC"
-                    //               : isLightSquare
-                    //                 ? "#F0D9B5"
-                    //                 : "#B58863",
-                    //     }}
-                    // >
-                    //     {piece && (
-                    //         <ChessPieceIcon
-                    //             type={piece.type}
-                    //             color={piece.color}
-                    //             size={squareSize * 0.72}
-                    //         />
-                    //     )}
-                    // </Pressable>
                     <Pressable
-  key={`${row}-${column}`}
-  onPress={() => onSquarePress(row, column)}
-  style={{
-    width: squareSize,
-    height: squareSize,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: isSelected
-      ? "#FACC15"
-      : isLightSquare
-        ? "#F0D9B5"
-        : "#B58863",
-  }}
->
-  {isValidMove && (
-    <View
-      pointerEvents="none"
-      style={{
-        position: "absolute",
-        width: squareSize * 0.28,
-        height: squareSize * 0.28,
-        borderRadius: squareSize * 0.14,
-        backgroundColor: "rgba(34, 197, 94, 0.45)",
-      }}
-    />
-  )}
+                        key={`${row}-${column}`}
+                        onPress={() => onSquarePress(row, column)}
+                        style={{
+                            width: squareSize,
+                            height: squareSize,
+                            alignItems: "center",
+                            justifyContent: "center",
+                            backgroundColor: isSelected
+                                ? "#FACC15"
+                                : isLightSquare
+                                  ? "#F0D9B5"
+                                  : "#B58863",
+                        }}
+                    >
+                        {isKingInCheck && (
+                            <View
+                                pointerEvents="none"
+                                style={{
+                                    position: "absolute",
+                                    width: "100%",
+                                    height: "100%",
+                                    backgroundColor: "rgba(239, 68, 68, 0.55)",
+                                }}
+                            />
+                        )}
+                        {isValidMove && (
+                            <View
+                                pointerEvents="none"
+                                style={{
+                                    position: "absolute",
+                                    width: squareSize * 0.28,
+                                    height: squareSize * 0.28,
+                                    borderRadius: squareSize * 0.14,
+                                    backgroundColor: "rgba(34, 197, 94, 0.45)",
+                                }}
+                            />
+                        )}
 
-  {piece && (
-    <ChessPieceIcon
-      type={piece.type}
-      color={piece.color}
-      size={squareSize * 0.72}
-    />
-  )}
-</Pressable>
+                        {piece && (
+                            <ChessPieceIcon
+                                type={piece.type}
+                                color={piece.color}
+                                size={squareSize * 0.72}
+                            />
+                        )}
+                    </Pressable>
                 );
             })}
         </View>

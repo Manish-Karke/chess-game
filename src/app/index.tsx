@@ -6,9 +6,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const chessFeature = createChessFeature();
 export default function HomeScreen() {
     const chessGame = useChessGameViewModel({
-        getValidMovesUseCase: chessFeature.getValidMovesUseCase,
-         movePieceUseCase:
-        chessFeature.movePieceUseCase,
+        getLegalMovesUseCase:
+        chessFeature.getLegalMovesUseCase,
+        movePieceUseCase: chessFeature.movePieceUseCase,
     });
     return (
         <SafeAreaView className="flex-1 items-center justify-center bg-white">
@@ -18,6 +18,7 @@ export default function HomeScreen() {
                 pieces={chessGame.pieces}
                 selectedSquare={chessGame.selectedSquare}
                 validMoves={chessGame.validMoves}
+                checkedKingPosition={chessGame.checkedKingPosition}
                 onSquarePress={chessGame.handleSquarePress}
             />
         </SafeAreaView>
