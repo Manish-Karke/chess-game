@@ -12,10 +12,8 @@ const chessFeature = createChessFeature();
 
 export default function HomeScreen() {
     const chessGame = useChessGameViewModel({
-        getLegalMovesUseCase:
-            chessFeature.getLegalMovesUseCase,
-        movePieceUseCase:
-            chessFeature.movePieceUseCase,
+        getLegalMovesUseCase: chessFeature.getLegalMovesUseCase,
+        movePieceUseCase: chessFeature.movePieceUseCase,
     });
 
     return (
@@ -28,32 +26,20 @@ export default function HomeScreen() {
 
                 <ChessBoard
                     pieces={chessGame.pieces}
-                    selectedSquare={
-                        chessGame.selectedSquare
-                    }
-                    validMoves={
-                        chessGame.validMoves
-                    }
-                    checkedKingPosition={
-                        chessGame.checkedKingPosition
-                    }
-                    onSquarePress={
-                        chessGame.handleSquarePress
-                    }
+                    selectedSquare={chessGame.selectedSquare}
+                    validMoves={chessGame.validMoves}
+                    checkedKingPosition={chessGame.checkedKingPosition}
+                    onSquarePress={chessGame.handleSquarePress}
                 />
 
-                {chessGame.gameStatus ===
-                    "checkmate" &&
-                    chessGame.winner && (
-                        <GameOverOverlay
-                            winner={
-                                chessGame.winner
-                            }
-                            onNewGame={
-                                chessGame.resetGame
-                            }
-                        />
-                    )}
+                {(chessGame.gameStatus === "checkmate" ||
+                    chessGame.gameStatus === "stalemate") && (
+                    <GameOverOverlay
+                        result={chessGame.gameStatus}
+                        winner={chessGame.winner}
+                        onNewGame={chessGame.resetGame}
+                    />
+                )}
             </View>
         </SafeAreaView>
     );

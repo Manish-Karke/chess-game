@@ -2,11 +2,16 @@ import React, { useEffect, useRef } from "react";
 import { Animated, Pressable, Text, View } from "react-native";
 
 type GameOverOverlayProps = {
-    winner: "white" | "black";
-    onNewGame?: () => void;
+    result: "checkmate" | "stalemate";
+    winner: "white" | "black" | null;
+    onNewGame: () => void;
 };
 
-export function GameOverOverlay({ winner, onNewGame }: GameOverOverlayProps) {
+export function GameOverOverlay({
+    winner,
+    onNewGame,
+    result,
+}: GameOverOverlayProps) {
     const scale = useRef(new Animated.Value(0.7)).current;
 
     const opacity = useRef(new Animated.Value(0)).current;
@@ -25,6 +30,15 @@ export function GameOverOverlay({ winner, onNewGame }: GameOverOverlayProps) {
             }),
         ]).start();
     }, [opacity, scale]);
+
+    const title = result === "checkmate" ? "CHECKMATE" : "STALEMATE";
+
+    const resultText =
+        result === "stalemate"
+            ? "DRAW"
+            : winner === "white"
+              ? "WHITE WINS"
+              : "BLACK WINS";
 
     return (
         <View
@@ -54,7 +68,7 @@ export function GameOverOverlay({ winner, onNewGame }: GameOverOverlayProps) {
                         color: "#FACC15",
                     }}
                 >
-                    CHECKMATE
+                    {title}
                 </Text>
 
                 <Text
@@ -65,30 +79,28 @@ export function GameOverOverlay({ winner, onNewGame }: GameOverOverlayProps) {
                         color: "#FFFFFF",
                     }}
                 >
-                    {winner === "white" ? "WHITE WINS" : "BLACK WINS"}
+                    {resultText}
                 </Text>
 
-                {onNewGame && (
-                    <Pressable
-                        onPress={onNewGame}
+                <Pressable
+                    onPress={onNewGame}
+                    style={{
+                        marginTop: 28,
+                        paddingHorizontal: 24,
+                        paddingVertical: 12,
+                        borderRadius: 10,
+                        backgroundColor: "#FFFFFF",
+                    }}
+                >
+                    <Text
                         style={{
-                            marginTop: 28,
-                            paddingHorizontal: 24,
-                            paddingVertical: 12,
-                            borderRadius: 10,
-                            backgroundColor: "#FFFFFF",
+                            fontWeight: "700",
+                            fontSize: 16,
                         }}
                     >
-                        <Text
-                            style={{
-                                fontWeight: "700",
-                                fontSize: 16,
-                            }}
-                        >
-                            NEW GAME
-                        </Text>
-                    </Pressable>
-                )}
+                        NEW GAME
+                    </Text>
+                </Pressable>
             </Animated.View>
         </View>
     );

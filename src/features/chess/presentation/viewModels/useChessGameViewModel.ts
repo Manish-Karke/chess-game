@@ -11,6 +11,7 @@ import { GetLegalMovesUseCase } from "../../domain/useCases/GetLegalMovesUseCase
 import { MovePieceUseCase } from "../../domain/useCases/MovePieceUseCase";
 import { IsKingInCheck } from "../../domain/rules/iskingInCheck";
 import { isCheckmate } from "../../domain/rules/isCheckmate";
+import { IsStalemate } from "../../domain/rules/isStalemate";
 
 export type ChessTurn = "white" | "black";
 
@@ -97,7 +98,7 @@ export function useChessGameViewModel({
         return null;
     }, [pieces]);
 
-   const gameState = useMemo<GameState>(() => {
+    const gameState = useMemo<GameState>(() => {
         const currentPlayerCheckmate = isCheckmate({
             color: currentTurn,
             pieces,
@@ -113,7 +114,18 @@ export function useChessGameViewModel({
                 winner,
             };
         }
+        const currentPlayerStalemate = IsStalemate({
+            color: currentTurn,
+            pieces,
+            getLegalMovesUseCase,
+        });
 
+        if (currentPlayerStalemate) {
+            return {
+                status: "stalemate",
+                winner: null,
+            };
+        }
         const currentPlayerInCheck = IsKingInCheck({
             color: currentTurn,
             pieces,
@@ -132,7 +144,7 @@ export function useChessGameViewModel({
         };
     }, [pieces, currentTurn, getLegalMovesUseCase]);
     const handleSquarePress = (row: number, column: number) => {
-        if (gameState.status === "checkmate") {
+        if (gameState.status === "checkmate" || gameState.status === "stalemate" ) {
             return;
         }
         const piece = pieces.find(
