@@ -1,6 +1,7 @@
 // domain/useCases/GetLegalMovesUseCaseImpl.ts
 
 import { BoardPosition } from "../entities/ChessPiece";
+import { getCastlingMoves } from "../rules/getCastlingMoves";
 import { IsKingInCheck } from "../rules/iskingInCheck";
 import { simulateMove } from "../rules/simulateMove";
 
@@ -15,10 +16,20 @@ export class GetLegalMovesUseCaseImpl implements GetLegalMovesUseCase {
     constructor(private readonly getValidMovesUseCase: GetValidMovesUseCase) {}
 
     execute({ piece, pieces }: GetLegalMovesInput): BoardPosition[] {
-        const candidateMoves = this.getValidMovesUseCase.execute({
+        const normalMoves = this.getValidMovesUseCase.execute({
             piece,
             pieces,
         });
+
+        const castlingMoves =
+            piece.type === "king"
+                ? getCastlingMoves({
+                      piece,
+                      pieces,
+                  })
+                : [];
+
+        const candidateMoves = [...normalMoves, ...castlingMoves];
 
         return candidateMoves.filter((target) => {
             const targetPiece = pieces.find(
@@ -26,8 +37,6 @@ export class GetLegalMovesUseCaseImpl implements GetLegalMovesUseCase {
                     item.row === target.row && item.column === target.column,
             );
 
-            // A king can be attacked/checkmated,
-            // but never captured.
             if (targetPiece?.type === "king") {
                 return false;
             }
@@ -38,12 +47,12 @@ export class GetLegalMovesUseCaseImpl implements GetLegalMovesUseCase {
                 target,
             });
 
-            const leavesKingInCheck = IsKingInCheck({
+            const kingStillInCheck = IsKingInCheck({
                 color: piece.color,
                 pieces: simulatedPieces,
             });
 
-            return !leavesKingInCheck;
+            return !kingStillInCheck;
         });
     }
 }

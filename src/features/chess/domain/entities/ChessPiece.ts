@@ -14,6 +14,7 @@ export type ChessPiece = {
     color: ChessPieceColor;
     row: number;
     column: number;
+        hasMoved: boolean;
 };
 
 export type GameStatus = "playing" | "check" | "checkmate" | "stalemate";
