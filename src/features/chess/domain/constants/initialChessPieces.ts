@@ -1,6 +1,8 @@
 import type { ChessPiece } from "../entities/ChessPiece";
 
-export const initialChessPieces: ChessPiece[] = [
+type InitialChessPiece = Omit<ChessPiece, "hasMoved">;
+
+const baseInitialChessPieces: InitialChessPiece[] = [
     // Black back row
     { id: "black-rook-1", type: "rook", color: "black", row: 0, column: 0 },
     { id: "black-knight-1", type: "knight", color: "black", row: 0, column: 1 },
@@ -10,10 +12,10 @@ export const initialChessPieces: ChessPiece[] = [
     { id: "black-bishop-2", type: "bishop", color: "black", row: 0, column: 5 },
     { id: "black-knight-2", type: "knight", color: "black", row: 0, column: 6 },
     { id: "black-rook-2", type: "rook", color: "black", row: 0, column: 7 },
-    // Black pawns
+
     ...Array.from(
         { length: 8 },
-        (_, column): ChessPiece => ({
+        (_, column): InitialChessPiece => ({
             id: `black-pawn-${column + 1}`,
             type: "pawn",
             color: "black",
@@ -22,10 +24,9 @@ export const initialChessPieces: ChessPiece[] = [
         }),
     ),
 
-    // White pawns
     ...Array.from(
         { length: 8 },
-        (_, column): ChessPiece => ({
+        (_, column): InitialChessPiece => ({
             id: `white-pawn-${column + 1}`,
             type: "pawn",
             color: "white",
@@ -34,7 +35,6 @@ export const initialChessPieces: ChessPiece[] = [
         }),
     ),
 
-    // White back row
     { id: "white-rook-1", type: "rook", color: "white", row: 7, column: 0 },
     { id: "white-knight-1", type: "knight", color: "white", row: 7, column: 1 },
     { id: "white-bishop-1", type: "bishop", color: "white", row: 7, column: 2 },
@@ -44,3 +44,9 @@ export const initialChessPieces: ChessPiece[] = [
     { id: "white-knight-2", type: "knight", color: "white", row: 7, column: 6 },
     { id: "white-rook-2", type: "rook", color: "white", row: 7, column: 7 },
 ];
+
+export const initialChessPieces: ChessPiece[] =
+    baseInitialChessPieces.map((piece) => ({
+        ...piece,
+        hasMoved: false,
+    }));
