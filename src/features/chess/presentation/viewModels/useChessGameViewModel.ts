@@ -36,7 +36,11 @@ export function useChessGameViewModel({
     movePieceUseCase,
     promotePawnUseCase,
 }: UseChessGameViewModelParams) {
-    const [pieces, setPieces] = useState<ChessPiece[]>(initialChessPieces);
+    const [pieces, setPieces] = useState<ChessPiece[]>(() =>
+        initialChessPieces.map((piece) => ({
+            ...piece,
+        })),
+    );
 
     const [selectedSquare, setSelectedSquare] = useState<SelectedSquare>(null);
 
@@ -74,44 +78,32 @@ export function useChessGameViewModel({
     };
 
     const checkedKingPosition = useMemo<BoardPosition | null>(() => {
-        const whiteInCheck = IsKingInCheck({
-            color: "white",
+        if (pendingPromotion) {
+            return null;
+        }
+
+        const inCheck = IsKingInCheck({
+            color: currentTurn,
             pieces,
         });
 
-        if (whiteInCheck) {
-            const whiteKing = pieces.find(
-                (piece) => piece.type === "king" && piece.color === "white",
-            );
-
-            if (whiteKing) {
-                return {
-                    row: whiteKing.row,
-                    column: whiteKing.column,
-                };
-            }
+        if (!inCheck) {
+            return null;
         }
 
-        const blackInCheck = IsKingInCheck({
-            color: "black",
-            pieces,
-        });
+        const king = pieces.find(
+            (piece) => piece.type === "king" && piece.color === currentTurn,
+        );
 
-        if (blackInCheck) {
-            const blackKing = pieces.find(
-                (piece) => piece.type === "king" && piece.color === "black",
-            );
-
-            if (blackKing) {
-                return {
-                    row: blackKing.row,
-                    column: blackKing.column,
-                };
-            }
+        if (!king) {
+            return null;
         }
 
-        return null;
-    }, [pieces]);
+        return {
+            row: king.row,
+            column: king.column,
+        };
+    }, [pieces, currentTurn, pendingPromotion]);
 
     const gameState = useMemo<GameState>(() => {
         if (pendingPromotion) {
@@ -213,157 +205,84 @@ export function useChessGameViewModel({
             return;
         }
 
-        // if (!selectedPieceId) {
-        //     return;
-        // }
-
-        // const movingPiece = pieces.find(
-        //     (piece) => piece.id === selectedPieceId,
-        // );
-
-        // if (!movingPiece) {
-        //     return;
-        // }
-
-        // const currentMove: ChessMove = {
-        //     pieceId: movingPiece.id,
-        //     pieceType: movingPiece.type,
-        //     color: movingPiece.color,
-
-        //     from: {
-        //         row: movingPiece.row,
-        //         column: movingPiece.column,
-        //     },
-
-        //     to: {
-        //         row,
-        //         column,
-        //     },
-        // };
-        // // const updatedPieces = movePieceUseCase.execute({
-        // //     pieces,
-        // //     pieceId: selectedPieceId,
-        // //     target: {
-        // //         row,
-        // //         column,
-        // //     },
-        // // });
-        // const updatedPieces = movePieceUseCase.execute({
-        //     pieces,
-        //     pieceId: selectedPieceId,
-        //     target: {
-        //         row,
-        //         column,
-        //     },
-        //     lastMove,
-        // });
-
-        // setPieces(updatedPieces);
-
-        // const movedPiece = updatedPieces.find(
-        //     (piece) => piece.id === selectedPieceId,
-        // );
-
-        // const requiresPromotion =
-        //     movedPiece?.type === "pawn" &&
-        //     ((movedPiece.color === "white" && movedPiece.row === 0) ||
-        //         (movedPiece.color === "black" && movedPiece.row === 7));
-
-        // if (requiresPromotion && movedPiece) {
-        //     setPendingPromotion({
-        //         pieceId: movedPiece.id,
-        //         color: movedPiece.color,
-        //     });
-
-        //     clearSelection();
-
-        //     // Very important:
-        //     // don't switch turn yet.
-        //     return;
-        // }
-
-        // setCurrentTurn((previousTurn) =>
-        //     previousTurn === "white" ? "black" : "white",
-        // );
-
-        // clearSelection();
         if (!selectedPieceId) {
-    return;
-}
+            return;
+        }
 
-const movingPiece = pieces.find(
-    (piece) => piece.id === selectedPieceId,
-);
+        const movingPiece = pieces.find(
+            (piece) => piece.id === selectedPieceId,
+        );
 
-if (!movingPiece) {
-    return;
-}
+        if (!movingPiece) {
+            return;
+        }
 
-// This is the move being made NOW.
-const currentMove: ChessMove = {
-    pieceId: movingPiece.id,
-    pieceType: movingPiece.type,
-    color: movingPiece.color,
+        // This is the move being made NOW.
+        const currentMove: ChessMove = {
+            pieceId: movingPiece.id,
+            pieceType: movingPiece.type,
+            color: movingPiece.color,
 
-    from: {
-        row: movingPiece.row,
-        column: movingPiece.column,
-    },
+            from: {
+                row: movingPiece.row,
+                column: movingPiece.column,
+            },
 
-    to: {
-        row,
-        column,
-    },
-};
+            to: {
+                row,
+                column,
+            },
+        };
 
-// IMPORTANT:
-// `lastMove` here is still the OPPONENT'S previous move.
-const updatedPieces = movePieceUseCase.execute({
-    pieces,
-    pieceId: selectedPieceId,
-    target: {
-        row,
-        column,
-    },
-    lastMove,
-});
+        // IMPORTANT:
+        // `lastMove` here is still the OPPONENT'S previous move.
+        const updatedPieces = movePieceUseCase.execute({
+            pieces,
+            pieceId: selectedPieceId,
+            target: {
+                row,
+                column,
+            },
+            lastMove,
+        });
 
-setPieces(updatedPieces);
+        const movedPiece = updatedPieces.find(
+            (piece) => piece.id === selectedPieceId,
+        );
 
-// Only AFTER executing the move,
-// currentMove becomes lastMove.
-setLastMove(currentMove);
+        const moveSucceeded =
+            movedPiece?.row === row && movedPiece?.column === column;
 
-const movedPiece = updatedPieces.find(
-    (piece) => piece.id === selectedPieceId,
-);
+        if (!moveSucceeded) {
+            return;
+        }
 
-const requiresPromotion =
-    movedPiece?.type === "pawn" &&
-    (
-        (movedPiece.color === "white" &&
-            movedPiece.row === 0) ||
-        (movedPiece.color === "black" &&
-            movedPiece.row === 7)
-    );
+        setPieces(updatedPieces);
 
-if (requiresPromotion && movedPiece) {
-    setPendingPromotion({
-        pieceId: movedPiece.id,
-        color: movedPiece.color,
-    });
+        // Only AFTER executing the move,
+        // currentMove becomes lastMove.
+        setLastMove(currentMove);
 
-    clearSelection();
-    return;
-}
+        const requiresPromotion =
+            movedPiece?.type === "pawn" &&
+            ((movedPiece.color === "white" && movedPiece.row === 0) ||
+                (movedPiece.color === "black" && movedPiece.row === 7));
 
-setCurrentTurn((previousTurn) =>
-    previousTurn === "white"
-        ? "black"
-        : "white",
-);
+        if (requiresPromotion && movedPiece) {
+            setPendingPromotion({
+                pieceId: movedPiece.id,
+                color: movedPiece.color,
+            });
 
-clearSelection();
+            clearSelection();
+            return;
+        }
+
+        setCurrentTurn((previousTurn) =>
+            previousTurn === "white" ? "black" : "white",
+        );
+
+        clearSelection();
     };
     const handlePromotion = (promoteTo: PromotionPieceType) => {
         if (!pendingPromotion) {
@@ -387,19 +306,6 @@ clearSelection();
         clearSelection();
     };
 
-    // const resetGame = () => {
-    //     setPieces(
-    //         initialChessPieces.map((piece) => ({
-    //             ...piece,
-    //         })),
-    //     );
-
-    //     setCurrentTurn("white");
-
-    //     setPendingPromotion(null);
-
-    //     clearSelection();
-    // };
     const resetGame = () => {
         setPieces(
             initialChessPieces.map((piece) => ({

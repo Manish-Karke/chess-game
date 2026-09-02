@@ -1,5 +1,3 @@
-// domain/useCases/GetLegalMovesUseCaseImpl.ts
-
 import { BoardPosition } from "../entities/ChessPiece";
 
 import { getCastlingMoves } from "../rules/getCastlingMoves";

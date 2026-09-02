@@ -1,36 +1,22 @@
 import ChessPieceIcon from "./ChessPieceIcon";
 import React from "react";
-import {
-    Pressable,
-    Text,
-    View,
-} from "react-native";
+import { Pressable, Text, View } from "react-native";
 
-export type PromotionPieceType =
-    | "queen"
-    | "rook"
-    | "bishop"
-    | "knight";
+export type PromotionPieceType = "queen" | "rook" | "bishop" | "knight";
 
 type PromotionOverlayProps = {
     color: "white" | "black";
-    onSelect: (
-        piece: PromotionPieceType
-    ) => void;
+    onSelect: (piece: PromotionPieceType) => void;
 };
 
-const PROMOTION_OPTIONS:
-    PromotionPieceType[] = [
-        "queen",
-        "rook",
-        "bishop",
-        "knight",
-    ];
+const PROMOTION_OPTIONS: PromotionPieceType[] = [
+    "queen",
+    "rook",
+    "bishop",
+    "knight",
+];
 
-export function PromotionOverlay({
-    color,
-    onSelect,
-}: PromotionOverlayProps) {
+export function PromotionOverlay({ color, onSelect }: PromotionOverlayProps) {
     return (
         <View
             style={{
@@ -43,8 +29,7 @@ export function PromotionOverlay({
                 alignItems: "center",
                 justifyContent: "center",
 
-                backgroundColor:
-                    "rgba(0,0,0,0.72)",
+                backgroundColor: "rgba(0,0,0,0.72)",
 
                 zIndex: 200,
             }}
@@ -73,35 +58,28 @@ export function PromotionOverlay({
                         gap: 12,
                     }}
                 >
-                    {PROMOTION_OPTIONS.map(
-                        (piece) => (
-                            <Pressable
-                                key={piece}
-                                onPress={() =>
-                                    onSelect(piece)
-                                }
-                                style={{
-                                    width: 64,
-                                    height: 64,
+                    {PROMOTION_OPTIONS.map((piece) => (
+                        <Pressable
+                            key={piece}
+                            onPress={() => onSelect(piece)}
+                            style={{
+                                width: 64,
+                                height: 64,
 
-                                    alignItems:
-                                        "center",
-                                    justifyContent:
-                                        "center",
+                                alignItems: "center",
+                                justifyContent: "center",
 
-                                    borderRadius: 10,
-                                    backgroundColor:
-                                        "#E5E7EB",
-                                }}
-                            >
-                                <ChessPieceIcon
-                                    type={piece}
-                                    color={color}
-                                    size={46}
-                                />
-                            </Pressable>
-                        ),
-                    )}
+                                borderRadius: 10,
+                                backgroundColor: "#E5E7EB",
+                            }}
+                        >
+                            <ChessPieceIcon
+                                type={piece}
+                                color={color}
+                                size={46}
+                            />
+                        </Pressable>
+                    ))}
                 </View>
             </View>
         </View>

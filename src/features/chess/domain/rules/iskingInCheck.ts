@@ -1,32 +1,3 @@
-// import { ChessPiece } from "../entities/ChessPiece";
-// import { isSquareAttacked } from "./isSquareAttacked";
-
-// type IsKingInCheckInput = {
-//     color: ChessPiece["color"];
-//     pieces: ChessPiece[];
-// };
-
-// export function IsKingInCheck({ color, pieces }: IsKingInCheckInput): boolean {
-//     const king = pieces.find((piece) => {
-//         piece.type === "king" && piece.color === color;
-//     });
-
-//     if (!king) {
-//         return false;
-//     }
-
-//     const opponentColor = color === "white" ? "black" : "white";
-
-//     return isSquareAttacked({
-//         position: {
-//             row: king.row,
-//             column: king.column,
-//         },
-//         byColor: opponentColor,
-//         pieces,
-//     });
-// }
-
 import { ChessPiece } from "../entities/ChessPiece";
 import { isSquareAttacked } from "./isSquareAttacked";
 

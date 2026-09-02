@@ -1,10 +1,6 @@
-import {
-    BoardPosition,
-    ChessMove,
-    ChessPiece,
-} from "../entities/ChessPiece";
+import { BoardPosition, ChessMove, ChessPiece } from "../entities/ChessPiece";
 
-import { applyMoveToPieces } from "../useCases/applyMoveToPieces";
+import { applyMoveToPieces } from "./applyMoveToPieces";
 
 type SimulateMoveInput = {
     pieces: ChessPiece[];

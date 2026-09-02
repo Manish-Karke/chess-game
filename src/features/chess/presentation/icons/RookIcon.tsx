@@ -1,30 +1,30 @@
-import React from 'react';
-import Svg, { Path, SvgProps } from 'react-native-svg';
+import React from "react";
+import Svg, { Path, SvgProps } from "react-native-svg";
 
 type RookIconProps = SvgProps & {
-  size?: number;
-  color?: string;
+    size?: number;
+    color?: string;
 };
 
 export function RookIcon({
-  size = 32,
-  color = '#FFFFFF',
-  ...rest
+    size = 32,
+    color = "#FFFFFF",
+    ...rest
 }: RookIconProps) {
-  return (
-    <Svg
-      width={size}
-      height={size}
-      viewBox="0 -960 960 960"
-      fill="none"
-      {...rest}
-    >
-      <Path
-        fill={color}
-        d="M160-80v-200q81-65 122-141t58-139h-20q-33 0-56.5-23.5T240-640v-240h200v120h80v-120h200v240q0 33-23.5 56.5T640-560h-21q17 63 58 139t123 141v200H160Zm80-80h480v-83q-86-78-126.5-163.5T536-560H423q-16 68-57 153.5T240-243v83Zm80-480h320v-160h-40v120H360v-120h-40v160Zm160 480ZM320-640h320-320Z"
-      />
-    </Svg>
-  );
+    return (
+        <Svg
+            width={size}
+            height={size}
+            viewBox="0 -960 960 960"
+            fill="none"
+            {...rest}
+        >
+            <Path
+                fill={color}
+                d="M160-80v-200q81-65 122-141t58-139h-20q-33 0-56.5-23.5T240-640v-240h200v120h80v-120h200v240q0 33-23.5 56.5T640-560h-21q17 63 58 139t123 141v200H160Zm80-80h480v-83q-86-78-126.5-163.5T536-560H423q-16 68-57 153.5T240-243v83Zm80-480h320v-160h-40v120H360v-120h-40v160Zm160 480ZM320-640h320-320Z"
+            />
+        </Svg>
+    );
 }
 
 export default RookIcon;
