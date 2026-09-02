@@ -15,14 +15,11 @@ const chessFeature = createChessFeature();
 
 export default function HomeScreen() {
     const chessGame = useChessGameViewModel({
-        getLegalMovesUseCase:
-            chessFeature.getLegalMovesUseCase,
+        getLegalMovesUseCase: chessFeature.getLegalMovesUseCase,
 
-        movePieceUseCase:
-            chessFeature.movePieceUseCase,
+        movePieceUseCase: chessFeature.movePieceUseCase,
 
-        promotePawnUseCase:
-            chessFeature.promotePawnUseCase,
+        promotePawnUseCase: chessFeature.promotePawnUseCase,
     });
 
     return (
@@ -32,36 +29,40 @@ export default function HomeScreen() {
                     currentTurn={chessGame.currentTurn}
                     onRestart={chessGame.resetGame}
                 />
+                <View
+                    style={{
+                        borderRadius: 12,
 
-                <ChessBoard
-                    pieces={chessGame.pieces}
-                    selectedSquare={chessGame.selectedSquare}
-                    validMoves={chessGame.validMoves}
-                    checkedKingPosition={
-                        chessGame.checkedKingPosition
-                    }
-                    onSquarePress={
-                        chessGame.handleSquarePress
-                    }
-                />
+                        shadowColor: "#00000",
+                        shadowOffset: {
+                            width: 0,
+                            height: 12,
+                        },
+                        shadowOpacity: 1,
+                        shadowRadius: 10,
 
+                        elevation: 10,
+                    }}
+                >
+                    <ChessBoard
+                        pieces={chessGame.pieces}
+                        selectedSquare={chessGame.selectedSquare}
+                        validMoves={chessGame.validMoves}
+                        checkedKingPosition={chessGame.checkedKingPosition}
+                        onSquarePress={chessGame.handleSquarePress}
+                    />
+                </View>
                 {/* Pawn promotion */}
                 {chessGame.pendingPromotion && (
                     <PromotionOverlay
-                        color={
-                            chessGame.pendingPromotion.color
-                        }
-                        onSelect={
-                            chessGame.handlePromotion
-                        }
+                        color={chessGame.pendingPromotion.color}
+                        onSelect={chessGame.handlePromotion}
                     />
                 )}
 
                 {/* Checkmate / stalemate */}
-                {(
-                    chessGame.gameStatus === "checkmate" ||
-                    chessGame.gameStatus === "stalemate"
-                ) && (
+                {(chessGame.gameStatus === "checkmate" ||
+                    chessGame.gameStatus === "stalemate") && (
                     <GameOverOverlay
                         result={chessGame.gameStatus}
                         winner={chessGame.winner}
