@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { initialChessPieces } from "../../domain/constants/initialChessPieces";
 import {
     BoardPosition,
+    ChessGameMode,
     ChessMove,
     ChessPiece,
     GameState,
@@ -308,6 +309,92 @@ export function useChessGameViewModel({
 
         clearSelection();
     };
+
+    const makeMove = (
+    pieceId: string,
+    target: BoardPosition,
+): boolean => {
+    const movingPiece = pieces.find(
+        (piece) => piece.id === pieceId,
+    );
+
+    if (!movingPiece) {
+        return false;
+    }
+
+    const currentMove: ChessMove = {
+        pieceId: movingPiece.id,
+        pieceType: movingPiece.type,
+        color: movingPiece.color,
+
+        from: {
+            row: movingPiece.row,
+            column: movingPiece.column,
+        },
+
+        to: target,
+    };
+
+    const updatedPieces =
+        movePieceUseCase.execute({
+            pieces,
+            pieceId,
+            target,
+            lastMove,
+        });
+
+    const movedPiece =
+        updatedPieces.find(
+            (piece) =>
+                piece.id === pieceId,
+        );
+
+    const moveSucceeded =
+        movedPiece?.row === target.row &&
+        movedPiece?.column === target.column;
+
+    if (!moveSucceeded) {
+        return false;
+    }
+
+    setPieces(updatedPieces);
+    setLastMove(currentMove);
+
+    const requiresPromotion =
+        movedPiece.type === "pawn" &&
+        (
+            (
+                movedPiece.color === "white" &&
+                movedPiece.row === 0
+            ) ||
+            (
+                movedPiece.color === "black" &&
+                movedPiece.row === 7
+            )
+        );
+
+    if (requiresPromotion) {
+        setPendingPromotion({
+            pieceId: movedPiece.id,
+            color: movedPiece.color,
+        });
+
+        clearSelection();
+
+        return true;
+    }
+
+    setCurrentTurn((previousTurn) =>
+        previousTurn === "white"
+            ? "black"
+            : "white",
+    );
+
+    clearSelection();
+
+    return true;
+};
+
     const materialState = useMemo(() => {
     const piecesCapturedByWhite =
         getCapturedPieces({
@@ -387,6 +474,7 @@ export function useChessGameViewModel({
 
     blackScore:
         materialState.blackScore,
+        makeMove,
         handleSquarePress,
         handlePromotion,
         resetGame,

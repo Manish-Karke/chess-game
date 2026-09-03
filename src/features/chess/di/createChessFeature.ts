@@ -1,8 +1,8 @@
+import { ChooseComputerMoveUseCaseImpl } from "../domain/useCases/ChooseComputerMoveUseCase.impl";
 import { GetLegalMovesUseCaseImpl } from "../domain/useCases/GetLegalMovesUseCase.Impl";
 import { GetValidMovesUseCaseImpl } from "../domain/useCases/GetValidMovesUseCase.Impl";
 import { MovePieceUseCaseImpl } from "../domain/useCases/MovePieceUseCase.Impl";
 import { PromotePawnUseCaseImpl } from "../domain/useCases/PromotePawnUseCase.Impl";
-
 
 export function createChessFeature() {
     const getValidMovesUseCase =
@@ -16,13 +16,18 @@ export function createChessFeature() {
     const movePieceUseCase =
         new MovePieceUseCaseImpl();
 
-          const promotePawnUseCase =
+    const promotePawnUseCase =
         new PromotePawnUseCaseImpl();
 
+    const chooseComputerMoveUseCase =
+        new ChooseComputerMoveUseCaseImpl(
+            getLegalMovesUseCase,
+        );
+
     return {
-        getValidMovesUseCase,
         getLegalMovesUseCase,
         movePieceUseCase,
-        promotePawnUseCase
+        promotePawnUseCase,
+        chooseComputerMoveUseCase,
     };
 }

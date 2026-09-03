@@ -10,7 +10,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function HomeScreen() {
     const handleTwoPlayerGame = () => {
         router.push({
-            pathname: "./game",
+            pathname: "/game",
             params: {
                 mode: "local",
             },
@@ -19,7 +19,7 @@ export default function HomeScreen() {
 
     const handleComputerGame = () => {
         router.push({
-            pathname: "./game",
+            pathname: "/game",
             params: {
                 mode: "computer",
             },
