@@ -22,7 +22,10 @@ export default function HomeScreen() {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-neutral-900">
+        <SafeAreaView style={{
+        flex: 1,
+        backgroundColor: "#EEEED2",
+    }}>
             <View
                 style={{
                     flex: 1,
