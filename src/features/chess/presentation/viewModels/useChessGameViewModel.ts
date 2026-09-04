@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { initialChessPieces } from "../../domain/constants/initialChessPieces";
 import {
     BoardPosition,
+    ChessGameMode,
     ChessMove,
     ChessPiece,
     GameState,
@@ -17,6 +18,9 @@ import {
     PromotePawnUseCase,
     PromotionPieceType,
 } from "../../domain/useCases/PromotePawnUseCase";
+import { calculateMaterialScore } from "../../domain/rules/calculateMaterialScore";
+import { getCapturedPieces } from "../../domain/rules/getCapturedPieces";
+import { PIECE_VALUES } from "../../domain/constants/pieceValues";
 
 export type ChessTurn = "white" | "black";
 
@@ -306,6 +310,132 @@ export function useChessGameViewModel({
         clearSelection();
     };
 
+    const makeMove = (
+    pieceId: string,
+    target: BoardPosition,
+): boolean => {
+    const movingPiece = pieces.find(
+        (piece) => piece.id === pieceId,
+    );
+
+    if (!movingPiece) {
+        return false;
+    }
+
+    const currentMove: ChessMove = {
+        pieceId: movingPiece.id,
+        pieceType: movingPiece.type,
+        color: movingPiece.color,
+
+        from: {
+            row: movingPiece.row,
+            column: movingPiece.column,
+        },
+
+        to: target,
+    };
+
+    const updatedPieces =
+        movePieceUseCase.execute({
+            pieces,
+            pieceId,
+            target,
+            lastMove,
+        });
+
+    const movedPiece =
+        updatedPieces.find(
+            (piece) =>
+                piece.id === pieceId,
+        );
+
+    const moveSucceeded =
+        movedPiece?.row === target.row &&
+        movedPiece?.column === target.column;
+
+    if (!moveSucceeded) {
+        return false;
+    }
+
+    setPieces(updatedPieces);
+    setLastMove(currentMove);
+
+    const requiresPromotion =
+        movedPiece.type === "pawn" &&
+        (
+            (
+                movedPiece.color === "white" &&
+                movedPiece.row === 0
+            ) ||
+            (
+                movedPiece.color === "black" &&
+                movedPiece.row === 7
+            )
+        );
+
+    if (requiresPromotion) {
+        setPendingPromotion({
+            pieceId: movedPiece.id,
+            color: movedPiece.color,
+        });
+
+        clearSelection();
+
+        return true;
+    }
+
+    setCurrentTurn((previousTurn) =>
+        previousTurn === "white"
+            ? "black"
+            : "white",
+    );
+
+    clearSelection();
+
+    return true;
+};
+
+    const materialState = useMemo(() => {
+    const piecesCapturedByWhite =
+        getCapturedPieces({
+            initialPieces: initialChessPieces,
+            currentPieces: pieces,
+
+            // White captures Black pieces
+            capturedColor: "black",
+        });
+
+    const piecesCapturedByBlack =
+        getCapturedPieces({
+            initialPieces: initialChessPieces,
+            currentPieces: pieces,
+
+            // Black captures White pieces
+            capturedColor: "white",
+        });
+
+    const whiteScore =
+        piecesCapturedByWhite.reduce(
+            (total, piece) =>
+                total + PIECE_VALUES[piece.type],
+            0,
+        );
+
+    const blackScore =
+        piecesCapturedByBlack.reduce(
+            (total, piece) =>
+                total + PIECE_VALUES[piece.type],
+            0,
+        );
+
+    return {
+        piecesCapturedByWhite,
+        piecesCapturedByBlack,
+        whiteScore,
+        blackScore,
+    };
+}, [pieces]);
+
     const resetGame = () => {
         setPieces(
             initialChessPieces.map((piece) => ({
@@ -325,7 +455,7 @@ export function useChessGameViewModel({
         selectedPieceId,
         validMoves,
         currentTurn,
-
+        lastMove,
         checkedKingPosition,
 
         gameStatus: gameState.status,
@@ -333,6 +463,18 @@ export function useChessGameViewModel({
 
         pendingPromotion,
 
+          piecesCapturedByWhite:
+        materialState.piecesCapturedByWhite,
+
+    piecesCapturedByBlack:
+        materialState.piecesCapturedByBlack,
+
+    whiteScore:
+        materialState.whiteScore,
+
+    blackScore:
+        materialState.blackScore,
+        makeMove,
         handleSquarePress,
         handlePromotion,
         resetGame,

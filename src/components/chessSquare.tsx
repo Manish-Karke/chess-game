@@ -77,35 +77,23 @@ function ChessSquareComponent({
             {isCaptureMove && piece && (
                 <View
                     pointerEvents="none"
-                     style={{
-        width: size,
-        height: size,
-        alignItems: "center",
-        justifyContent: "center",
-    }}
+                    style={{
+                        position: "absolute",
+                        width: size * 0.88,
+                        height: size * 0.88,
+                        borderRadius: size,
+                        borderWidth: size * 0.07,
+                        borderColor: "rgba(30, 30, 30, 0.25)",
+                    }}
                 />
             )}
 
             {piece && (
-        <View
-            style={{
-                shadowColor: "#000",
-                shadowOffset: {
-                    width: 0,
-                    height: size * 0.05,
-                },
-                shadowOpacity: 0.35,
-                shadowRadius: size * 0.05,
-
-                elevation: 5,
-            }}
-        >
-            <ChessPieceIcon
-                type={piece.type}
-                color={piece.color}
-                size={size * 0.76}
-            />
-        </View>
+                <ChessPieceIcon
+                    type={piece.type}
+                    color={piece.color}
+                    size={size * 0.78}
+                />
             )}
         </Pressable>
     );
