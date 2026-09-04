@@ -17,7 +17,7 @@ export function ChessGameContent({
     chessGame,
 }: ChessGameContentProps) {
     return (
-        <SafeAreaView className="flex-1 bg-neutral-400">
+        <SafeAreaView className="flex-1 bg-slate-300">
             <View
                 style={{
                     flex: 1,

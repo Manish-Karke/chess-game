@@ -5,8 +5,10 @@ import { GetLegalMovesUseCase } from "../../domain/useCases/GetLegalMovesUseCase
 import { MovePieceUseCase } from "../../domain/useCases/MovePieceUseCase";
 import { PromotePawnUseCase } from "../../domain/useCases/PromotePawnUseCase";
 import { ChooseComputerMoveUseCase } from "../../domain/useCases/ChooseComputerMoveUseCase";
+import { ComputerDifficulty } from "../../domain/entities/ChessPiece";
 
 type Params = {
+      difficulty: ComputerDifficulty;
     getLegalMovesUseCase: GetLegalMovesUseCase;
     movePieceUseCase: MovePieceUseCase;
     promotePawnUseCase: PromotePawnUseCase;
@@ -19,6 +21,7 @@ export function useComputerChessGameViewModel({
     movePieceUseCase,
     promotePawnUseCase,
     chooseComputerMoveUseCase,
+    difficulty
 }: Params) {
     const game = useChessGameViewModel({
         getLegalMovesUseCase,
@@ -45,6 +48,7 @@ export function useComputerChessGameViewModel({
                 pieces: game.pieces,
                 color: "black",
                 lastMove: game.lastMove,
+                difficulty,
             });
 
             if (!move) {

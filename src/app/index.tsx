@@ -18,12 +18,7 @@ export default function HomeScreen() {
     };
 
     const handleComputerGame = () => {
-        router.push({
-            pathname: "/game",
-            params: {
-                mode: "computer",
-            },
-        });
+        router.push("/computerDifficultylevel");
     };
 
     return (

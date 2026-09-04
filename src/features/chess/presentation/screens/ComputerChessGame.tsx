@@ -3,12 +3,18 @@ import { createChessFeature } from "../../di/createChessFeature";
 import { useComputerChessGameViewModel } from "../viewModels/useComputerChessGameViewModel";
 
 import { ChessGameContent } from "../components/ChessGameContent";
+import { ComputerDifficulty } from "../../domain/entities/ChessPiece";
 
 const chessFeature = createChessFeature();
-
-export function ComputerChessGame() {
+type ComputerChessGameProps = {
+    difficulty: ComputerDifficulty;
+};
+export function ComputerChessGame({
+    difficulty
+}:ComputerChessGameProps) {
     const chessGame =
         useComputerChessGameViewModel({
+            difficulty,
             getLegalMovesUseCase:
                 chessFeature.getLegalMovesUseCase,
 
