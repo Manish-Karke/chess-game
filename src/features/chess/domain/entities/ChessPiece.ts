@@ -14,7 +14,7 @@ export type ChessPiece = {
     color: ChessPieceColor;
     row: number;
     column: number;
-        hasMoved: boolean;
+    hasMoved: boolean;
 };
 
 export type GameStatus = "playing" | "check" | "checkmate" | "stalemate";
@@ -31,7 +31,6 @@ export type GameState = {
     winner: ChessTurn | null;
 };
 
-
 export type ChessMove = {
     pieceId: string;
     pieceType: ChessPiece["type"];
@@ -40,3 +39,7 @@ export type ChessMove = {
     from: BoardPosition;
     to: BoardPosition;
 };
+
+export type ChessGameMode = "local" | "computer";
+
+export type ComputerDifficulty = "easy" | "medium" | "hard";
