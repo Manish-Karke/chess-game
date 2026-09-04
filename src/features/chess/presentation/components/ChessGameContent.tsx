@@ -8,16 +8,17 @@ import { GameOverOverlay } from "@/features/chess/presentation/components/GameOv
 import { useChessGameViewModel } from "@/features/chess/presentation/viewModels/useChessGameViewModel";
 
 type ChessGameContentProps = {
-    chessGame: ReturnType<
-        typeof useChessGameViewModel
-    >;
+    chessGame: ReturnType<typeof useChessGameViewModel>;
 };
 
-export function ChessGameContent({
-    chessGame,
-}: ChessGameContentProps) {
+export function ChessGameContent({ chessGame }: ChessGameContentProps) {
     return (
-        <SafeAreaView className="flex-1 bg-slate-300">
+        <SafeAreaView
+            style={{
+                flex: 1,
+                backgroundColor: "#E5E7EB",
+            }}
+        >
             <View
                 style={{
                     flex: 1,
@@ -27,26 +28,15 @@ export function ChessGameContent({
                 }}
             >
                 <GameControls
-                    currentTurn={
-                        chessGame.currentTurn
-                    }
-                    onRestart={
-                        chessGame.resetGame
-                    }
+                    currentTurn={chessGame.currentTurn}
+                    onRestart={chessGame.resetGame}
                 />
 
                 <PlayerMaterialBar
                     color="black"
-                    score={
-                        chessGame.blackScore
-                    }
-                    capturedPieces={
-                        chessGame.piecesCapturedByBlack
-                    }
-                    isCurrentTurn={
-                        chessGame.currentTurn ===
-                        "black"
-                    }
+                    score={chessGame.blackScore}
+                    capturedPieces={chessGame.piecesCapturedByBlack}
+                    isCurrentTurn={chessGame.currentTurn === "black"}
                 />
 
                 <View
@@ -68,70 +58,35 @@ export function ChessGameContent({
                     }}
                 >
                     <ChessBoard
-                        pieces={
-                            chessGame.pieces
-                        }
-                        selectedSquare={
-                            chessGame.selectedSquare
-                        }
-                        validMoves={
-                            chessGame.validMoves
-                        }
-                        checkedKingPosition={
-                            chessGame.checkedKingPosition
-                        }
-                        lastMove={
-                            chessGame.lastMove
-                        }
-                        onSquarePress={
-                            chessGame.handleSquarePress
-                        }
+                        pieces={chessGame.pieces}
+                        selectedSquare={chessGame.selectedSquare}
+                        validMoves={chessGame.validMoves}
+                        checkedKingPosition={chessGame.checkedKingPosition}
+                        lastMove={chessGame.lastMove}
+                        onSquarePress={chessGame.handleSquarePress}
                     />
                 </View>
 
                 <PlayerMaterialBar
                     color="white"
-                    score={
-                        chessGame.whiteScore
-                    }
-                    capturedPieces={
-                        chessGame.piecesCapturedByWhite
-                    }
-                    isCurrentTurn={
-                        chessGame.currentTurn ===
-                        "white"
-                    }
+                    score={chessGame.whiteScore}
+                    capturedPieces={chessGame.piecesCapturedByWhite}
+                    isCurrentTurn={chessGame.currentTurn === "white"}
                 />
 
                 {chessGame.pendingPromotion && (
                     <PromotionOverlay
-                        color={
-                            chessGame
-                                .pendingPromotion
-                                .color
-                        }
-                        onSelect={
-                            chessGame.handlePromotion
-                        }
+                        color={chessGame.pendingPromotion.color}
+                        onSelect={chessGame.handlePromotion}
                     />
                 )}
 
-                {(
-                    chessGame.gameStatus ===
-                        "checkmate" ||
-                    chessGame.gameStatus ===
-                        "stalemate"
-                ) && (
+                {(chessGame.gameStatus === "checkmate" ||
+                    chessGame.gameStatus === "stalemate") && (
                     <GameOverOverlay
-                        result={
-                            chessGame.gameStatus
-                        }
-                        winner={
-                            chessGame.winner
-                        }
-                        onNewGame={
-                            chessGame.resetGame
-                        }
+                        result={chessGame.gameStatus}
+                        winner={chessGame.winner}
+                        onNewGame={chessGame.resetGame}
                     />
                 )}
             </View>
