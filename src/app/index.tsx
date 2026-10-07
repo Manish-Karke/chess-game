@@ -1,10 +1,6 @@
 import { router } from "expo-router";
 import React from "react";
-import {
-    Pressable,
-    Text,
-    View,
-} from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
@@ -21,11 +17,17 @@ export default function HomeScreen() {
         router.push("/computerDifficultylevel");
     };
 
+    const handlePlayOnline = () => {
+        router.push("/online-matchmaking");
+    };
+
     return (
-        <SafeAreaView style={{
-        flex: 1,
-        backgroundColor: "#EEEED2",
-    }}>
+        <SafeAreaView
+            style={{
+                flex: 1,
+                backgroundColor: "#EEEED2",
+            }}
+        >
             <View
                 style={{
                     flex: 1,
@@ -121,6 +123,37 @@ export default function HomeScreen() {
                             }}
                         >
                             Challenge the computer
+                        </Text>
+                    </Pressable>
+
+                     <Pressable
+                        onPress={handlePlayOnline}
+                        style={{
+                            padding: 20,
+                            borderRadius: 16,
+                            backgroundColor: "#262626",
+                            borderWidth: 1,
+                            borderColor: "#404040",
+                        }}
+                    >
+                        <Text
+                            style={{
+                                fontSize: 20,
+                                fontWeight: "800",
+                                color: "#FFFFFF",
+                            }}
+                        >
+                            Play Online with friend
+                        </Text>
+
+                        <Text
+                            style={{
+                                marginTop: 6,
+                                fontSize: 14,
+                                color: "#A3A3A3",
+                            }}
+                        >
+                            Challenge the friends
                         </Text>
                     </Pressable>
                 </View>

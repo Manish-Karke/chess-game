@@ -40,6 +40,6 @@ export type ChessMove = {
     to: BoardPosition;
 };
 
-export type ChessGameMode = "local" | "computer";
+export type ChessGameMode = "local" | "computer" | "online";
 
 export type ComputerDifficulty = "easy" | "medium" | "hard";

@@ -6,9 +6,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { PromotionOverlay } from "@/features/chess/presentation/components/PromotionOverlay";
 import { GameOverOverlay } from "@/features/chess/presentation/components/GameOverOverlay";
 import { useChessGameViewModel } from "@/features/chess/presentation/viewModels/useChessGameViewModel";
+import { ChessGameViewModel } from "../types/ChessGameViewModel";
 
 type ChessGameContentProps = {
-    chessGame: ReturnType<typeof useChessGameViewModel>;
+    chessGame: ChessGameViewModel;
 };
 
 export function ChessGameContent({ chessGame }: ChessGameContentProps) {

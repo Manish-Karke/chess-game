@@ -3,7 +3,6 @@ import { useMemo, useState } from "react";
 import { initialChessPieces } from "../../domain/constants/initialChessPieces";
 import {
     BoardPosition,
-    ChessGameMode,
     ChessMove,
     ChessPiece,
     GameState,
@@ -33,12 +32,14 @@ type UseChessGameViewModelParams = {
     getLegalMovesUseCase: GetLegalMovesUseCase;
     movePieceUseCase: MovePieceUseCase;
     promotePawnUseCase: PromotePawnUseCase;
+    onMove?: (move: ChessMove) => void;
 };
 
 export function useChessGameViewModel({
     getLegalMovesUseCase,
     movePieceUseCase,
     promotePawnUseCase,
+    onMove
 }: UseChessGameViewModelParams) {
     const [pieces, setPieces] = useState<ChessPiece[]>(() =>
         initialChessPieces.map((piece) => ({
@@ -266,7 +267,7 @@ export function useChessGameViewModel({
         // Only AFTER executing the move,
         // currentMove becomes lastMove.
         setLastMove(currentMove);
-
+        onMove?.(currentMove);
         const requiresPromotion =
             movedPiece?.type === "pawn" &&
             ((movedPiece.color === "white" && movedPiece.row === 0) ||

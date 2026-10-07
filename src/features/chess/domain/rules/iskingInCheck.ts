@@ -17,19 +17,13 @@ export function IsKingInCheck({
     );
 
     if (!king) {
-        console.log("KING NOT FOUND:", color);
         return false;
     }
 
     const opponentColor =
         color === "white" ? "black" : "white";
 
-    console.log("CHECKING KING:", {
-        color,
-        row: king.row,
-        column: king.column,
-        attackedBy: opponentColor,
-    });
+   
 
     return isSquareAttacked({
         position: {

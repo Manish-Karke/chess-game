@@ -393,12 +393,6 @@ export class HardComputerStrategy implements ComputerMoveStrategy {
             alpha = Math.max(alpha, bestScore);
         }
 
-        console.log("[HARD AI]", {
-            time: Date.now() - startedAt,
-            bestScore,
-            bestMove,
-        });
-
         return bestMove;
     }
 
