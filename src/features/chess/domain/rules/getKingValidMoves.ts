@@ -41,7 +41,6 @@ export function getKingValidMoves({
             (item) => item.row === targetRow && item.column === targetColumn,
         );
 
-        // King cannot land on its own piece
         if (targetPiece?.color === piece.color) {
             continue;
         }

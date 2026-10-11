@@ -17,18 +17,7 @@ import {
 import { chessSocket } from "@/features/chess/infrastructure/realtime/chessSocket";
 
 export default function OnlineMatchmakingScreen() {
-    // const handleMatched = useCallback((match: MatchFoundPayload) => {
-    //     router.replace({
-    //         pathname: "/game",
-
-    //         params: {
-    //             mode: "online",
-
-    //             gameId: match.gameId,
-    //         },
-    //     });
-    // }, []);
-    const handleMatched = useCallback((match: MatchFoundPayload) => {
+  const handleMatched = useCallback((match: MatchFoundPayload) => {
         const myColor =
             match.whitePlayer.socketId === chessSocket.id ? "white" : "black";
         router.replace({

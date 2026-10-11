@@ -21,7 +21,6 @@ export function getCastlingMoves({
 
     const homeRow = piece.color === "white" ? 7 : 0;
 
-    // King must still be on original square
     if (piece.row !== homeRow || piece.column !== 4) {
         return [];
     }
@@ -44,10 +43,6 @@ export function getCastlingMoves({
     }
 
     const castlingMoves: BoardPosition[] = [];
-
-    // --------------------------
-    // KING-SIDE CASTLING
-    // --------------------------
 
     const kingSideRook = pieces.find(
         (item) =>
@@ -74,10 +69,6 @@ export function getCastlingMoves({
             });
         }
     }
-
-    // --------------------------
-    // QUEEN-SIDE CASTLING
-    // --------------------------
 
     const queenSideRook = pieces.find(
         (item) =>

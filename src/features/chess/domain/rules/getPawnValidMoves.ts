@@ -21,10 +21,6 @@ export function getPawnValidMoves({
     const getPieceAt = (row: number, column: number): ChessPiece | undefined =>
         pieces.find((item) => item.row === row && item.column === column);
 
-    // --------------------------------
-    // 1. One square forward
-    // --------------------------------
-
     const oneStepRow = piece.row + direction;
 
     const oneStepPiece = getPieceAt(oneStepRow, piece.column);
@@ -34,11 +30,6 @@ export function getPawnValidMoves({
             row: oneStepRow,
             column: piece.column,
         });
-
-        // --------------------------------
-        // 2. Two squares from initial row
-        // --------------------------------
-
         const twoStepRow = piece.row + direction * 2;
 
         const twoStepPiece = getPieceAt(twoStepRow, piece.column);
@@ -55,10 +46,6 @@ export function getPawnValidMoves({
         }
     }
 
-    // --------------------------------
-    // 3. Diagonal capture LEFT
-    // --------------------------------
-
     const captureRow = piece.row + direction;
 
     const leftColumn = piece.column - 1;
@@ -74,9 +61,6 @@ export function getPawnValidMoves({
         }
     }
 
-    // --------------------------------
-    // 4. Diagonal capture RIGHT
-    // --------------------------------
 
     const rightColumn = piece.column + 1;
 

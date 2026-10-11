@@ -43,8 +43,6 @@ export function getKnightValidMoves({
             (item) => item.row === targetRow && item.column === targetColumn,
         );
 
-        //can't land over the same color pieces
-
         if (targetPiece?.color === piece.color) {
             continue;
         }

@@ -1,5 +1,3 @@
-// app/(tabs)/_layout.tsx
-
 import React, { useEffect } from "react";
 import { Tabs } from "expo-router";
 import { DarkTheme, DefaultTheme, ThemeProvider } from "expo-router";
@@ -27,12 +25,6 @@ export default function TabLayout() {
                     }}
                 />
 
-                {/* <Tabs.Screen
-                    name="explore"
-                    options={{
-                        title: "Explore",
-                    }}
-                /> */}
             </Tabs>
         </ThemeProvider>
     );

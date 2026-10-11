@@ -1,5 +1,3 @@
-// domain/constants/pieceValues.ts
-
 import { ChessPiece } from "../entities/ChessPiece";
 
 export const PIECE_VALUES: Record<
