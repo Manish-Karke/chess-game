@@ -58,11 +58,21 @@ export function useComputerChessGameViewModel({
                 return;
             }
 
-            game.makeMove(move.pieceId, move.to);
+            game.makeMove(move.pieceId, move.to, {
+                isComputerMove: true,
+            });
         }, 500);
 
         return () => clearTimeout(timer);
-    }, [isComputerTurn, game.pieces, game.lastMove, game.gameStatus]);
+    }, [
+    isComputerTurn,
+    game.pieces,
+    game.lastMove,
+    game.gameStatus,
+    chooseComputerMoveUseCase,
+    difficulty,
+    game.makeMove,
+]);
 
     return {
         ...game,

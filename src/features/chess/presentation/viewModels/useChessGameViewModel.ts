@@ -340,7 +340,13 @@ export function useChessGameViewModel({
         clearSelection();
     };
 
-    const makeMove = (pieceId: string, target: BoardPosition): boolean => {
+    const makeMove = (
+        pieceId: string,
+        target: BoardPosition,
+        options?: {
+            isComputerMove?: boolean;
+        },
+    ): boolean => {
         const movingPiece = pieces.find((piece) => piece.id === pieceId);
 
         if (!movingPiece) {
@@ -392,6 +398,24 @@ export function useChessGameViewModel({
                 (movedPiece.color === "black" && movedPiece.row === 7));
 
         if (requiresPromotion) {
+            if (options?.isComputerMove) {
+                const promotedPieces = promotePawnUseCase.execute({
+                    pieces: updatedPieces,
+                    pieceId: movedPiece.id,
+                    promoteTo: "queen",
+                });
+
+                setPieces(promotedPieces);
+
+                setCurrentTurn((previousTurn) =>
+                    previousTurn === "white" ? "black" : "white",
+                );
+
+                clearSelection();
+
+                return true;
+            }
+
             setPendingPromotion({
                 pieceId: movedPiece.id,
                 color: movedPiece.color,

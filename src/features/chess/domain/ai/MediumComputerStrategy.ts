@@ -25,7 +25,6 @@ export class MediumComputerStrategy implements ComputerMoveStrategy {
             pieces,
             color,
             lastMove,
-
             getLegalMovesUseCase: this.getLegalMovesUseCase,
         });
 
@@ -33,47 +32,68 @@ export class MediumComputerStrategy implements ComputerMoveStrategy {
             return null;
         }
 
-        let bestMove: ChessMove | null = null;
+        const opponentColor = color === "white" ? "black" : "white";
 
+        let bestMove: ChessMove | null = null;
         let bestScore = -Infinity;
 
         for (const move of legalMoves) {
-            let simulatedPieces = applyMoveToPieces({
-                pieces,
-                pieceId: move.pieceId,
-
-                target: move.to,
-
-                lastMove,
-            });
-
-            simulatedPieces = promotePawnIfNeeded({
-                pieces: simulatedPieces,
-
+            const nextPieces = promotePawnIfNeeded({
+                pieces: applyMoveToPieces({
+                    pieces,
+                    pieceId: move.pieceId,
+                    target: move.to,
+                    lastMove,
+                }),
                 pieceId: move.pieceId,
             });
 
-            let score = evaluateBoard({
-                pieces: simulatedPieces,
-
-                computerColor: color,
-            });
-
-            const opponentColor = color === "white" ? "black" : "white";
-
-            const givesCheck = IsKingInCheck({
+            // The opponent must respond to this move.
+            const opponentReplies = getAllLegalMoves({
+                pieces: nextPieces,
                 color: opponentColor,
-
-                pieces: simulatedPieces,
+                lastMove: move,
+                getLegalMovesUseCase: this.getLegalMovesUseCase,
             });
 
-            if (givesCheck) {
-                score += 40;
+            let worstReplyScore = Infinity;
+
+            if (opponentReplies.length === 0) {
+                // Checkmate is better than any ordinary position.
+                const opponentInCheck = IsKingInCheck({
+                    pieces: nextPieces,
+                    color: opponentColor,
+                });
+
+                worstReplyScore = opponentInCheck
+                    ? 100_000
+                    : evaluateBoard({
+                          pieces: nextPieces,
+                          computerColor: color,
+                      });
+            } else {
+                for (const reply of opponentReplies) {
+                    const replyPieces = promotePawnIfNeeded({
+                        pieces: applyMoveToPieces({
+                            pieces: nextPieces,
+                            pieceId: reply.pieceId,
+                            target: reply.to,
+                            lastMove: move,
+                        }),
+                        pieceId: reply.pieceId,
+                    });
+
+                    const score = evaluateBoard({
+                        pieces: replyPieces,
+                        computerColor: color,
+                    });
+
+                    worstReplyScore = Math.min(worstReplyScore, score);
+                }
             }
 
-            // Tiny randomness avoids
-            // identical play every game.
-            score += Math.random() * 10;
+            // Keep randomness small and use it only for close scores.
+            const score = worstReplyScore;
 
             if (score > bestScore) {
                 bestScore = score;
@@ -93,11 +113,7 @@ function promotePawnIfNeeded({
     pieceId: string;
 }): ChessPiece[] {
     return pieces.map((piece) => {
-        if (piece.id !== pieceId) {
-            return piece;
-        }
-
-        if (piece.type !== "pawn") {
+        if (piece.id !== pieceId || piece.type !== "pawn") {
             return piece;
         }
 
