@@ -19,6 +19,7 @@ type UseOnlineChessGameViewModelParams = {
     getLegalMovesUseCase: GetLegalMovesUseCase;
     movePieceUseCase: MovePieceUseCase;
     promotePawnUseCase: PromotePawnUseCase;
+    playMoveSound?: () => void;
 };
 
 export function useOnlineChessGameViewModel({
@@ -27,17 +28,15 @@ export function useOnlineChessGameViewModel({
     getLegalMovesUseCase,
     movePieceUseCase,
     promotePawnUseCase,
+    playMoveSound,
 }: UseOnlineChessGameViewModelParams) {
     const chessGame = useChessGameViewModel({
         getLegalMovesUseCase,
         movePieceUseCase,
         promotePawnUseCase,
-
+        playMoveSound,
         onMove: (move: ChessMove) => {
-            chessSocket.emit(
-                "game:move",
-                move,
-            );
+            chessSocket.emit("game:move", move);
         },
     });
 
@@ -63,11 +62,8 @@ export function useOnlineChessGameViewModel({
         };
     }, [makeMove]);
 
-  
     const handleSquarePress = useCallback(
         (row: number, column: number) => {
-           
-
             if (currentTurn !== color) {
                 return;
             }

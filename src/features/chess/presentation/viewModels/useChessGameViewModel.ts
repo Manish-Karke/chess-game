@@ -17,9 +17,9 @@ import {
     PromotePawnUseCase,
     PromotionPieceType,
 } from "../../domain/useCases/PromotePawnUseCase";
-import { calculateMaterialScore } from "../../domain/rules/calculateMaterialScore";
-import { getCapturedPieces } from "../../domain/rules/getCapturedPieces";
-import { PIECE_VALUES } from "../../domain/constants/pieceValues";
+// import { getCapturedPieces } from "../../domain/rules/getCapturedPieces";
+import { getCapturedPieceForMove } from "../../domain/rules/getCapturedPieceForMove";
+import { calculateCapturedMaterialScore } from "../../domain/rules/calculateCapturedMaterialScore";
 
 export type ChessTurn = "white" | "black";
 
@@ -33,13 +33,15 @@ type UseChessGameViewModelParams = {
     movePieceUseCase: MovePieceUseCase;
     promotePawnUseCase: PromotePawnUseCase;
     onMove?: (move: ChessMove) => void;
+    playMoveSound?: () => void;
 };
 
 export function useChessGameViewModel({
     getLegalMovesUseCase,
     movePieceUseCase,
     promotePawnUseCase,
-    onMove
+    onMove,
+    playMoveSound,
 }: UseChessGameViewModelParams) {
     const [pieces, setPieces] = useState<ChessPiece[]>(() =>
         initialChessPieces.map((piece) => ({
@@ -59,6 +61,13 @@ export function useChessGameViewModel({
         useState<PendingPromotion>(null);
 
     const [lastMove, setLastMove] = useState<ChessMove | null>(null);
+    const [piecesCapturedByWhite, setPiecesCapturedByWhite] = useState<
+        ChessPiece[]
+    >([]);
+
+    const [piecesCapturedByBlack, setPiecesCapturedByBlack] = useState<
+        ChessPiece[]
+    >([]);
     const clearSelection = () => {
         setSelectedPieceId(null);
         setSelectedSquare(null);
@@ -81,7 +90,6 @@ export function useChessGameViewModel({
 
         setValidMoves(moves);
     };
-
     const checkedKingPosition = useMemo<BoardPosition | null>(() => {
         if (pendingPromotion) {
             return null;
@@ -238,7 +246,15 @@ export function useChessGameViewModel({
                 column,
             },
         };
-
+        const capturedPiece = getCapturedPieceForMove({
+            pieces,
+            pieceId: selectedPieceId,
+            target: {
+                row,
+                column,
+            },
+            lastMove,
+        });
         // IMPORTANT:
         // `lastMove` here is still the OPPONENT'S previous move.
         const updatedPieces = movePieceUseCase.execute({
@@ -254,7 +270,6 @@ export function useChessGameViewModel({
         const movedPiece = updatedPieces.find(
             (piece) => piece.id === selectedPieceId,
         );
-
         const moveSucceeded =
             movedPiece?.row === row && movedPiece?.column === column;
 
@@ -267,7 +282,21 @@ export function useChessGameViewModel({
         // Only AFTER executing the move,
         // currentMove becomes lastMove.
         setLastMove(currentMove);
+        playMoveSound?.();
         onMove?.(currentMove);
+        if (capturedPiece) {
+            if (movingPiece.color === "white") {
+                setPiecesCapturedByWhite((previous) => [
+                    ...previous,
+                    capturedPiece,
+                ]);
+            } else {
+                setPiecesCapturedByBlack((previous) => [
+                    ...previous,
+                    capturedPiece,
+                ]);
+            }
+        }
         const requiresPromotion =
             movedPiece?.type === "pawn" &&
             ((movedPiece.color === "white" && movedPiece.row === 0) ||
@@ -311,139 +340,141 @@ export function useChessGameViewModel({
         clearSelection();
     };
 
-    const makeMove = (
-    pieceId: string,
-    target: BoardPosition,
-): boolean => {
-    const movingPiece = pieces.find(
-        (piece) => piece.id === pieceId,
-    );
+    const makeMove = (pieceId: string, target: BoardPosition): boolean => {
+        const movingPiece = pieces.find((piece) => piece.id === pieceId);
 
-    if (!movingPiece) {
-        return false;
-    }
+        if (!movingPiece) {
+            return false;
+        }
 
-    const currentMove: ChessMove = {
-        pieceId: movingPiece.id,
-        pieceType: movingPiece.type,
-        color: movingPiece.color,
+        const currentMove: ChessMove = {
+            pieceId: movingPiece.id,
+            pieceType: movingPiece.type,
+            color: movingPiece.color,
 
-        from: {
-            row: movingPiece.row,
-            column: movingPiece.column,
-        },
+            from: {
+                row: movingPiece.row,
+                column: movingPiece.column,
+            },
 
-        to: target,
-    };
-
-    const updatedPieces =
-        movePieceUseCase.execute({
+            to: target,
+        };
+        const capturedPiece = getCapturedPieceForMove({
             pieces,
             pieceId,
             target,
             lastMove,
         });
 
-    const movedPiece =
-        updatedPieces.find(
-            (piece) =>
-                piece.id === pieceId,
-        );
-
-    const moveSucceeded =
-        movedPiece?.row === target.row &&
-        movedPiece?.column === target.column;
-
-    if (!moveSucceeded) {
-        return false;
-    }
-
-    setPieces(updatedPieces);
-    setLastMove(currentMove);
-
-    const requiresPromotion =
-        movedPiece.type === "pawn" &&
-        (
-            (
-                movedPiece.color === "white" &&
-                movedPiece.row === 0
-            ) ||
-            (
-                movedPiece.color === "black" &&
-                movedPiece.row === 7
-            )
-        );
-
-    if (requiresPromotion) {
-        setPendingPromotion({
-            pieceId: movedPiece.id,
-            color: movedPiece.color,
+        const updatedPieces = movePieceUseCase.execute({
+            pieces,
+            pieceId,
+            target,
+            lastMove,
         });
+
+        const movedPiece = updatedPieces.find((piece) => piece.id === pieceId);
+
+        const moveSucceeded =
+            movedPiece?.row === target.row &&
+            movedPiece?.column === target.column;
+
+        if (!moveSucceeded) {
+            return false;
+        }
+
+        setPieces(updatedPieces);
+        setLastMove(currentMove);
+        playMoveSound?.();
+        const requiresPromotion =
+            movedPiece.type === "pawn" &&
+            ((movedPiece.color === "white" && movedPiece.row === 0) ||
+                (movedPiece.color === "black" && movedPiece.row === 7));
+
+        if (requiresPromotion) {
+            setPendingPromotion({
+                pieceId: movedPiece.id,
+                color: movedPiece.color,
+            });
+
+            clearSelection();
+
+            return true;
+        }
+
+        setCurrentTurn((previousTurn) =>
+            previousTurn === "white" ? "black" : "white",
+        );
 
         clearSelection();
 
         return true;
-    }
-
-    setCurrentTurn((previousTurn) =>
-        previousTurn === "white"
-            ? "black"
-            : "white",
-    );
-
-    clearSelection();
-
-    return true;
-};
-
-    const materialState = useMemo(() => {
-    const piecesCapturedByWhite =
-        getCapturedPieces({
-            initialPieces: initialChessPieces,
-            currentPieces: pieces,
-
-            // White captures Black pieces
-            capturedColor: "black",
-        });
-
-    const piecesCapturedByBlack =
-        getCapturedPieces({
-            initialPieces: initialChessPieces,
-            currentPieces: pieces,
-
-            // Black captures White pieces
-            capturedColor: "white",
-        });
-
-    const whiteScore =
-        piecesCapturedByWhite.reduce(
-            (total, piece) =>
-                total + PIECE_VALUES[piece.type],
-            0,
-        );
-
-    const blackScore =
-        piecesCapturedByBlack.reduce(
-            (total, piece) =>
-                total + PIECE_VALUES[piece.type],
-            0,
-        );
-
-    return {
-        piecesCapturedByWhite,
-        piecesCapturedByBlack,
-        whiteScore,
-        blackScore,
     };
-}, [pieces]);
 
+    //     const materialState = useMemo(() => {
+    //     const piecesCapturedByWhite =
+    //         getCapturedPieces({
+    //             initialPieces: initialChessPieces,
+    //             currentPieces: pieces,
+
+    //             // White captures Black pieces
+    //             capturedColor: "black",
+    //         });
+
+    //     const piecesCapturedByBlack =
+    //         getCapturedPieces({
+    //             initialPieces: initialChessPieces,
+    //             currentPieces: pieces,
+
+    //             // Black captures White pieces
+    //             capturedColor: "white",
+    //         });
+
+    //     const whiteScore =
+    //         piecesCapturedByWhite.reduce(
+    //             (total, piece) =>
+    //                 total + PIECE_VALUES[piece.type],
+    //             0,
+    //         );
+
+    //     const blackScore =
+    //         piecesCapturedByBlack.reduce(
+    //             (total, piece) =>
+    //                 total + PIECE_VALUES[piece.type],
+    //             0,
+    //         );
+
+    //     return {
+    //         piecesCapturedByWhite,
+    //         piecesCapturedByBlack,
+    //         whiteScore,
+    //         blackScore,
+    //     };
+    // }, [pieces]);
+    const materialState = useMemo(() => {
+        const whiteScore = calculateCapturedMaterialScore(
+            piecesCapturedByWhite,
+        );
+
+        const blackScore = calculateCapturedMaterialScore(
+            piecesCapturedByBlack,
+        );
+
+        return {
+            piecesCapturedByWhite,
+            piecesCapturedByBlack,
+            whiteScore,
+            blackScore,
+        };
+    }, [piecesCapturedByWhite, piecesCapturedByBlack]);
     const resetGame = () => {
         setPieces(
             initialChessPieces.map((piece) => ({
                 ...piece,
             })),
         );
-
+        setPiecesCapturedByWhite([]);
+        setPiecesCapturedByBlack([]);
         setCurrentTurn("white");
         setPendingPromotion(null);
         setLastMove(null);
@@ -464,17 +495,13 @@ export function useChessGameViewModel({
 
         pendingPromotion,
 
-          piecesCapturedByWhite:
-        materialState.piecesCapturedByWhite,
+        piecesCapturedByWhite: materialState.piecesCapturedByWhite,
 
-    piecesCapturedByBlack:
-        materialState.piecesCapturedByBlack,
+        piecesCapturedByBlack: materialState.piecesCapturedByBlack,
 
-    whiteScore:
-        materialState.whiteScore,
+        whiteScore: materialState.whiteScore,
 
-    blackScore:
-        materialState.blackScore,
+        blackScore: materialState.blackScore,
         makeMove,
         handleSquarePress,
         handlePromotion,

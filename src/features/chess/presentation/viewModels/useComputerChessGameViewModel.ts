@@ -6,27 +6,30 @@ import { MovePieceUseCase } from "../../domain/useCases/MovePieceUseCase";
 import { PromotePawnUseCase } from "../../domain/useCases/PromotePawnUseCase";
 import { ChooseComputerMoveUseCase } from "../../domain/useCases/ChooseComputerMoveUseCase";
 import { ComputerDifficulty } from "../../domain/entities/ChessPiece";
+import { useChessMoveSound } from "@/shared/audio/useChessMoveSound";
 
 type Params = {
-      difficulty: ComputerDifficulty;
+    difficulty: ComputerDifficulty;
     getLegalMovesUseCase: GetLegalMovesUseCase;
     movePieceUseCase: MovePieceUseCase;
     promotePawnUseCase: PromotePawnUseCase;
 
     chooseComputerMoveUseCase: ChooseComputerMoveUseCase;
 };
-
 export function useComputerChessGameViewModel({
     getLegalMovesUseCase,
     movePieceUseCase,
     promotePawnUseCase,
     chooseComputerMoveUseCase,
-    difficulty
+    difficulty,
 }: Params) {
+    const { playMoveSound } = useChessMoveSound();
+
     const game = useChessGameViewModel({
         getLegalMovesUseCase,
         movePieceUseCase,
         promotePawnUseCase,
+        playMoveSound,
     });
 
     const isComputerTurn = game.currentTurn === "black";

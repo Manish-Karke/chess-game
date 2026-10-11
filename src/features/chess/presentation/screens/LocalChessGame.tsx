@@ -1,25 +1,18 @@
 import { createChessFeature } from "../../di/createChessFeature";
 import { useChessGameViewModel } from "../viewModels/useChessGameViewModel";
 import { ChessGameContent } from "../components/ChessGameContent";
+import { useChessMoveSound } from "@/shared/audio/useChessMoveSound";
 
 const chessFeature = createChessFeature();
 
 export function LocalChessGame() {
-    const chessGame =
-        useChessGameViewModel({
-            getLegalMovesUseCase:
-                chessFeature.getLegalMovesUseCase,
+    const { playMoveSound } = useChessMoveSound();
+    const chessGame = useChessGameViewModel({
+        getLegalMovesUseCase: chessFeature.getLegalMovesUseCase,
+        movePieceUseCase: chessFeature.movePieceUseCase,
+        promotePawnUseCase: chessFeature.promotePawnUseCase,
+        playMoveSound,
+    });
 
-            movePieceUseCase:
-                chessFeature.movePieceUseCase,
-
-            promotePawnUseCase:
-                chessFeature.promotePawnUseCase,
-        });
-
-    return (
-        <ChessGameContent
-            chessGame={chessGame}
-        />
-    );
+    return <ChessGameContent chessGame={chessGame} />;
 }

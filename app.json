@@ -31,7 +31,8 @@
           "image": "./assets/images/chess-splash.png",
           "imageWidth": 280
         }
-      ]
+      ],
+      "expo-audio"
     ],
     "experiments": {
       "typedRoutes": true,

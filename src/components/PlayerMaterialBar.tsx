@@ -1,135 +1,145 @@
 
-import { ChessPiece } from "@/features/chess/domain/entities/ChessPiece";
-import ChessPieceIcon from "@/features/chess/presentation/components/ChessPieceIcon";
 import React from "react";
 import {
-    Text,
-    View,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 
+import { ChessPiece } from "@/features/chess/domain/entities/ChessPiece";
+import ChessPieceIcon from "@/features/chess/presentation/components/ChessPieceIcon";
+
 type PlayerMaterialBarProps = {
-    color: ChessPiece["color"];
-    score: number;
-
-    capturedPieces: ChessPiece[];
-
-    isCurrentTurn?: boolean;
+  color: ChessPiece["color"];
+  score: number;
+  capturedPieces: ChessPiece[];
+  isCurrentTurn?: boolean;
 };
 
+const CAPTURED_AREA_HEIGHT = 38;
+
 export function PlayerMaterialBar({
-    color,
-    score,
-    capturedPieces,
-    isCurrentTurn = false,
+  color,
+  score,
+  capturedPieces,
+  isCurrentTurn = false,
 }: PlayerMaterialBarProps) {
-    const playerName =
-        color === "white"
-            ? "White"
-            : "Black";
+  const playerName = color === "white" ? "White" : "Black";
 
-    return (
-        <View
-            style={{
-                width: "100%",
-                paddingHorizontal: 4,
-                paddingVertical: 10,
-            }}
-        >
-            <View
-                style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                }}
-            >
-                <View
-                    style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        gap: 8,
-                    }}
-                >
-                    <View
-                        style={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: 5,
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <View style={styles.playerInfo}>
+          <View
+            style={[
+              styles.colorIndicator,
+              color === "white"
+                ? styles.whiteIndicator
+                : styles.blackIndicator,
+            ]}
+          />
 
-                            backgroundColor:
-                                color === "white"
-                                    ? "#F8FAFC"
-                                    : "#111827",
+          <Text style={styles.playerName}>{playerName}</Text>
 
-                            borderWidth:
-                                color === "white"
-                                    ? 1
-                                    : 0,
-
-                            borderColor: "#111827",
-                        }}
-                    />
-
-                    <Text
-                        style={{
-                            fontSize: 17,
-                            fontWeight: "800",
-                            color: "#111827",
-                        }}
-                    >
-                        {playerName}
-                    </Text>
-
-                    {isCurrentTurn && (
-                        <Text
-                            style={{
-                                fontSize: 11,
-                                fontWeight: "700",
-                                color: "#16A34A",
-                            }}
-                        >
-                            TURN
-                        </Text>
-                    )}
-                </View>
-
-                <Text
-                    style={{
-                        fontSize: 18,
-                        fontWeight: "900",
-                        color: "#111827",
-                    }}
-                >
-                    +{score}
-                </Text>
-            </View>
-
-            {capturedPieces.length > 0 && (
-                <View
-                    style={{
-                        marginTop: 6,
-                        flexDirection: "row",
-                        flexWrap: "wrap",
-                        alignItems: "center",
-                    }}
-                >
-                    {capturedPieces.map(
-                        (piece) => (
-                            <View
-                                key={piece.id}
-                                style={{
-                                    marginRight: -4,
-                                }}
-                            >
-                                <ChessPieceIcon
-                                    type={piece.type}
-                                    color={piece.color}
-                                    size={24}
-                                />
-                            </View>
-                        ),
-                    )}
-                </View>
-            )}
+          {isCurrentTurn && (
+            <Text style={styles.turnLabel}>TURN</Text>
+          )}
         </View>
-    );
+
+        <Text style={styles.score}>+{score}</Text>
+      </View>
+
+      <View style={styles.capturedContainer}>
+        {capturedPieces.length > 0 ? (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.capturedContent}
+          >
+            {capturedPieces.map((piece) => (
+              <View key={piece.id} style={styles.piece}>
+                <ChessPieceIcon
+                  type={piece.type}
+                  color={piece.color}
+                  size={24}
+                />
+              </View>
+            ))}
+          </ScrollView>
+        ) : (
+          <View style={styles.emptyContent} />
+        )}
+      </View>
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    width: "100%",
+    paddingHorizontal: 4,
+    paddingVertical: 6,
+  },
+  header: {
+    height: 30,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  playerInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  colorIndicator: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  whiteIndicator: {
+    backgroundColor: "#F8FAFC",
+    borderWidth: 1,
+    borderColor: "#111827",
+  },
+  blackIndicator: {
+    backgroundColor: "#111827",
+  },
+  playerName: {
+    fontSize: 17,
+    fontWeight: "800",
+    color: "#111827",
+  },
+  turnLabel: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#16A34A",
+  },
+  score: {
+    fontSize: 18,
+    fontWeight: "900",
+    color: "#111827",
+  },
+  capturedContainer: {
+    height: CAPTURED_AREA_HEIGHT,
+    marginTop: 4,
+    borderRadius: 8,
+    backgroundColor: "#D1D5DB",
+    overflow: "hidden",
+    justifyContent: "center",
+  },
+  capturedContent: {
+    alignItems: "center",
+    paddingHorizontal: 6,
+    gap: 2,
+  },
+  emptyContent: {
+    flex: 1,
+  },
+  piece: {
+    width: 26,
+    height: 30,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});
