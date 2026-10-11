@@ -1,4 +1,5 @@
 import { ChessMove, ChessPiece } from "../entities/ChessPiece";
+import { getCapturedPieceForMove } from "../rules/getCapturedPieceForMove";
 import { GetLegalMovesUseCase } from "../useCases/GetLegalMovesUseCase";
 import {
     ComputerMoveStrategy,
@@ -37,18 +38,18 @@ export class EasyComputerStrategy implements ComputerMoveStrategy {
         let bestScore = -Infinity;
 
         for (const move of legalMoves) {
-            const capturedPiece = pieces.find(
-                (piece) =>
-                    piece.row === move.to.row &&
-                    piece.column === move.to.column,
-            );
+            const capturedPiece = getCapturedPieceForMove({
+                pieces,
+                pieceId: move.pieceId,
+                target: move.to,
+                lastMove,
+            });
 
             const captureScore = capturedPiece
                 ? PIECE_VALUES[capturedPiece.type]
                 : 0;
 
             const randomScore = Math.random() * 350;
-
             const score = captureScore + randomScore;
 
             if (score > bestScore) {
