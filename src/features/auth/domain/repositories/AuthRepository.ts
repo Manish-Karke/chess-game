@@ -22,6 +22,22 @@ export type VerifyEmailResult = {
   message: string;
 };
 
+export type LoginUserInput = {
+  email: string;
+  password: string;
+};
+
+export type LoginUserResult = {
+  accessToken: string;
+  tokenType: "Bearer";
+  expiresIn: number;
+  user: {
+    id: string;
+    email: string;
+    username: string;
+  };
+};
+
 export interface AuthRepository {
   register(
     input: RegisterUserInput,
@@ -30,4 +46,8 @@ export interface AuthRepository {
   verifyEmail(
     input: VerifyEmailInput,
   ): Promise<VerifyEmailResult>;
+
+  login(
+    input: LoginUserInput,
+  ): Promise<LoginUserResult>;
 }

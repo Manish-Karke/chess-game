@@ -1,22 +1,33 @@
 import type {
-  AuthRepository,
-  RegisterUserInput,
-  RegisterUserResult,
+    AuthRepository,
+    LoginUserInput,
+    LoginUserResult,
+    RegisterUserInput,
+    RegisterUserResult,
 } from "../../domain/repositories/AuthRepository";
+import { tokenStorage } from "../storage/TokenStorage";
 
-import { registerRequest, verifyEmailRequest } from "./authApi";
+import { loginRequest, registerRequest, verifyEmailRequest } from "./authApi";
 
 export class AuthRepositoryImpl implements AuthRepository {
-  async register(
-    input: RegisterUserInput,
-  ): Promise<RegisterUserResult> {
-    return registerRequest(input);
-  }
+    async register(input: RegisterUserInput): Promise<RegisterUserResult> {
+        return registerRequest(input);
+    }
 
-  async verifyEmail(input: {
-  email: string;
-  code: string;
-}): Promise<{ message: string }> {
-  return verifyEmailRequest(input);
+    async verifyEmail(input: {
+        email: string;
+        code: string;
+    }): Promise<{ message: string }> {
+        return verifyEmailRequest(input);
+    }
+
+   async login(
+  input: LoginUserInput,
+): Promise<LoginUserResult> {
+  const result = await loginRequest(input);
+
+  await tokenStorage.save(result.accessToken);
+
+  return result;
 }
 }
