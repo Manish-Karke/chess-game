@@ -1,19 +1,29 @@
+
 import { Stack } from "expo-router";
 
 export default function AuthLayout() {
   return (
-    <Stack>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        animation: "slide_from_right",
+        gestureEnabled: true,
+        contentStyle: {
+          backgroundColor: "#050A12",
+        },
+      }}
+    >
       <Stack.Screen
         name="register"
-        options={{ title: "Create account" }}
-      />
-      <Stack.Screen
-        name="verify-email"
-        options={{ title: "Verify email" }}
+        options={{ animation: "slide_from_right" }}
       />
       <Stack.Screen
         name="login"
-        options={{ title: "Login" }}
+        options={{ animation: "slide_from_right" }}
+      />
+      <Stack.Screen
+        name="verify-email"
+        options={{ animation: "fade" }}
       />
     </Stack>
   );

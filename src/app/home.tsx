@@ -126,7 +126,7 @@ export default function HomeScreen() {
                         </Text>
                     </Pressable>
 
-                     <Pressable
+                    <Pressable
                         onPress={handlePlayOnline}
                         style={{
                             padding: 20,
