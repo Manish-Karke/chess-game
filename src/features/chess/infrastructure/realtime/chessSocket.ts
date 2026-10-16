@@ -6,7 +6,7 @@ import {
 } from "socket.io-client";
 
 const SERVER_URL =
-    "http://192.168.1.77:3000";
+    "https://server-5-5h5o.onrender.com";
 
 export const chessSocket: Socket =
     io(
