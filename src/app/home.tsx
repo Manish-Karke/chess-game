@@ -40,26 +40,25 @@ function MenuItem({
     onPress,
     featured = false,
 }: MenuItemProps) {
-    return(
-
+    return (
         <Pressable style={styles.gameCard} onPress={onPress}>
-  <View style={styles.iconBox}>
-    <Ionicons name={icon} size={27} color={COLORS.goldLight} />
-  </View>
+            <View style={styles.iconBox}>
+                <Ionicons name={icon} size={27} color={COLORS.goldLight} />
+            </View>
 
-  <View style={styles.cardText}>
-    <Text style={styles.cardTitle}>{title}</Text>
-    <Text style={styles.cardSubtitle}>{subtitle}</Text>
-  </View>
+            <View style={styles.cardText}>
+                <Text style={styles.cardTitle}>{title}</Text>
+                <Text style={styles.cardSubtitle}>{subtitle}</Text>
+            </View>
 
-  <View style={styles.arrowBox}>
-    <Ionicons
-      name="chevron-forward"
-      size={20}
-      color={COLORS.goldLight}
-    />
-  </View>
-</Pressable>
+            <View style={styles.arrowBox}>
+                <Ionicons
+                    name="chevron-forward"
+                    size={20}
+                    color={COLORS.goldLight}
+                />
+            </View>
+        </Pressable>
     );
 }
 
@@ -301,6 +300,51 @@ export default function HomeScreen() {
                         <View style={styles.menuDivider} />
 
                         <Pressable
+                            onPress={() => {
+                                setSettingsVisible(false);
+                                router.push("/board-appearance");
+                            }}
+                            style={{
+                                width: "100%",
+                                height: 50,
+                                flexDirection: "row",
+                                alignItems: "center",
+                                paddingHorizontal: 3,
+                            }}
+                            accessibilityRole="button"
+                            accessibilityLabel="Board Appearance"
+                        >
+                            <Ionicons
+                                name="color-palette-outline"
+                                size={21}
+                                color={COLORS.goldLight}
+                                style={{ width: 28, flexShrink: 0 }}
+                            />
+
+                            <View style={{ flex: 1, minWidth: 0 }}>
+                                <Text
+                                    numberOfLines={1}
+                                    style={{
+                                        color: COLORS.white,
+                                        fontSize: 14,
+                                        fontWeight: "600",
+                                    }}
+                                >
+                                    Board Appearance
+                                </Text>
+                            </View>
+
+                            <Ionicons
+                                name="chevron-forward"
+                                size={18}
+                                color={COLORS.muted}
+                                style={{ flexShrink: 0, marginLeft: 8 }}
+                            />
+                        </Pressable>
+
+                        <View style={styles.menuDivider} />
+
+                        <Pressable
                             style={styles.accountRow}
                             disabled={loggingOut}
                             onPress={handleLogout}
@@ -310,6 +354,7 @@ export default function HomeScreen() {
                                 size={21}
                                 color="#FF8585"
                             />
+
                             <Text style={styles.logoutText}>
                                 {loggingOut ? "Logging out..." : "Log out"}
                             </Text>
@@ -344,7 +389,13 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         paddingBottom: 24,
     },
-
+    accountRow: {
+        minHeight: 50,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+        paddingHorizontal: 3,
+    },
     topBar: {
         width: "100%",
         height: 46,
@@ -575,14 +626,6 @@ const styles = StyleSheet.create({
     menuDivider: {
         height: 1,
         backgroundColor: "rgba(255, 255, 255, 0.10)",
-    },
-
-    accountRow: {
-        minHeight: 50,
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 12,
-        paddingHorizontal: 3,
     },
 
     accountRowText: {

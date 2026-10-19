@@ -1,9 +1,7 @@
 
 import { Redirect } from "expo-router";
 import { ActivityIndicator, View } from "react-native";
-
-import { useSession } from
-  "@/features/auth/presentation/session/SessionProvider";
+import { useSession } from "@/features/auth/presentation/session/SessionProvider";
 
 export default function Index() {
   const { status } = useSession();
@@ -23,9 +21,13 @@ export default function Index() {
     );
   }
 
-  if (status === "authenticated") {
-    return <Redirect href="/home" />;
-  }
-
-  return <Redirect href="/(auth)/login" />;
+  return (
+    <Redirect
+      href={
+        status === "authenticated"
+          ? "/home"
+          : "/(auth)/login"
+      }
+    />
+  );
 }

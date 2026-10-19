@@ -7,7 +7,7 @@ import React, { useMemo } from "react";
 import { View, useWindowDimensions } from "react-native";
 
 import { ChessSquare } from "./chessSquare";
-
+import { useBoardAppearance } from "@/features/chess/appearance/presentation/BoardAppearanceProvider";
 const BOARD_DIMENSION = 8;
 const HORIZONTAL_PADDING = 16;
 const MAX_BOARD_SIZE = 520;
@@ -25,11 +25,8 @@ type ChessBoardProps = {
     onSquarePress: (row: number, column: number) => void;
 };
 
-const getPositionKey = (
-    row: number,
-    column: number,
-): string => `${row}-${column}`;
-
+const getPositionKey = (row: number, column: number): string =>
+    `${row}-${column}`;
 export function ChessBoard({
     pieces,
     selectedSquare,
@@ -39,11 +36,9 @@ export function ChessBoard({
     onSquarePress,
 }: ChessBoardProps) {
     const { width } = useWindowDimensions();
+    const { theme, appearance } = useBoardAppearance();
 
-    const boardSize = Math.min(
-        width - HORIZONTAL_PADDING * 2,
-        MAX_BOARD_SIZE,
-    );
+    const boardSize = Math.min(width - HORIZONTAL_PADDING * 2, MAX_BOARD_SIZE);
 
     const squareSize = boardSize / BOARD_DIMENSION;
 
@@ -51,10 +46,7 @@ export function ChessBoard({
         const map = new Map<string, ChessPiece>();
 
         for (const piece of pieces) {
-            map.set(
-                getPositionKey(piece.row, piece.column),
-                piece,
-            );
+            map.set(getPositionKey(piece.row, piece.column), piece);
         }
 
         return map;
@@ -62,9 +54,7 @@ export function ChessBoard({
 
     const validMoveSet = useMemo(() => {
         return new Set(
-            validMoves.map((move) =>
-                getPositionKey(move.row, move.column),
-            ),
+            validMoves.map((move) => getPositionKey(move.row, move.column)),
         );
     }, [validMoves]);
 
@@ -98,8 +88,7 @@ export function ChessBoard({
                 const isLastMove =
                     (lastMove?.from.row === row &&
                         lastMove.from.column === column) ||
-                    (lastMove?.to.row === row &&
-                        lastMove.to.column === column);
+                    (lastMove?.to.row === row && lastMove.to.column === column);
 
                 return (
                     <ChessSquare
@@ -111,11 +100,11 @@ export function ChessBoard({
                         isLight={(row + column) % 2 === 0}
                         isSelected={isSelected}
                         isValidMove={isValidMove}
-                        isCaptureMove={
-                            isValidMove && Boolean(piece)
-                        }
+                        isCaptureMove={isValidMove && Boolean(piece)}
                         isKingInCheck={isKingInCheck}
                         isLastMove={isLastMove}
+                        showCoordinates={appearance.showCoordinates}
+                        theme={theme}
                         onPress={onSquarePress}
                     />
                 );

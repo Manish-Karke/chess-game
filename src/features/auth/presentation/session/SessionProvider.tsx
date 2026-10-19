@@ -12,10 +12,7 @@ import {
   SessionExpiredError,
 } from "@/features/auth/infrastructure/api/TokenRefreshService";
 
-import {
-  logoutRequest,
-} from "@/features/auth/infrastructure/api/authApi";
-
+import { logoutRequest } from "@/features/auth/infrastructure/api/authApi";
 import { tokenStorage } from "@/features/auth/infrastructure/storage/TokenStorage";
 import { disconnectChessSocket } from "@/features/chess/infrastructure/realtime/chessSocket";
 
@@ -38,103 +35,106 @@ export function SessionProvider({
 }) {
   const [status, setStatus] = useState<SessionStatus>("loading");
 
-  const refreshSession = useCallback(async () => {
-    setStatus("loading");
+  // Restore the session once when the app starts.
+  useEffect(() => {
+    let active = true;
 
+    async function restoreSession() {
+      try {
+        await tokenRefreshService.getValidAccessToken();
+
+        if (active) {
+          setStatus("authenticated");
+        }
+      } catch (error) {
+        if (!active) return;
+
+        if (error instanceof SessionExpiredError) {
+          try {
+            await tokenStorage.clear();
+          } catch {
+            console.warn("Unable to clear expired session.");
+          }
+
+          if (active) {
+            setStatus("unauthenticated");
+          }
+
+          return;
+        }
+
+        // A temporary network error doesn't automatically mean
+        // the saved session is invalid.
+        try {
+          const refreshToken = await tokenStorage.getRefreshToken();
+
+          if (active) {
+            setStatus(
+              refreshToken ? "authenticated" : "unauthenticated",
+            );
+          }
+        } catch {
+          if (active) {
+            setStatus("unauthenticated");
+          }
+        }
+      }
+    }
+
+    void restoreSession();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Refresh credentials without sending an already visible screen
+  // back to the initial loading state.
+  const refreshSession = useCallback(async () => {
     try {
       await tokenRefreshService.getValidAccessToken();
       setStatus("authenticated");
     } catch (error) {
       if (error instanceof SessionExpiredError) {
-        await tokenStorage.clear();
-        setStatus("unauthenticated");
+        try {
+          await tokenStorage.clear();
+        } finally {
+          setStatus("unauthenticated");
+        }
+
         return;
       }
 
-      // A network failure doesn't necessarily mean the session
-      // is invalid. Keep the stored session for a later retry.
       const refreshToken = await tokenStorage.getRefreshToken();
 
-      if (refreshToken) {
-        setStatus("authenticated");
-        return;
+      if (!refreshToken) {
+        setStatus("unauthenticated");
       }
 
-      setStatus("unauthenticated");
+      // If a refresh fails temporarily but a refresh token exists,
+      // preserve the current status instead of causing navigation.
     }
   }, []);
 
- const logout = useCallback(async () => {
-  // Disconnect locally first.
-  disconnectChessSocket();
+  const logout = useCallback(async () => {
+    disconnectChessSocket();
 
-  try {
-    const refreshToken = await tokenStorage.getRefreshToken();
-
-    if (refreshToken) {
-      await logoutRequest(refreshToken);
-    }
-  } catch {
-    // Server or storage operation failed.
-    // Continue attempting to clear local credentials.
-    console.warn("Logout request or token retrieval failed.");
-  } finally {
     try {
-      await tokenStorage.clear();
+      const refreshToken = await tokenStorage.getRefreshToken();
+
+      if (refreshToken) {
+        await logoutRequest(refreshToken);
+      }
+    } catch {
+      console.warn("Logout request failed; clearing local session.");
     } finally {
-      setStatus("unauthenticated");
-    }
-  }
-}, []);
-
- useEffect(() => {
-  let active = true;
-
-  void (async () => {
-    try {
-      await tokenRefreshService.getValidAccessToken();
-
-      if (active) {
-        setStatus("authenticated");
-      }
-    } catch (error) {
-      if (!active) return;
-
-      if (error instanceof SessionExpiredError) {
-        try {
-          await tokenStorage.clear();
-        } catch {
-          console.warn("Unable to clear expired session.");
-        }
-
-        if (active) {
-          setStatus("unauthenticated");
-        }
-
-        return;
-      }
-
-      // A network failure alone does not prove the session is invalid.
       try {
-        const refreshToken = await tokenStorage.getRefreshToken();
-
-        if (active) {
-          setStatus(
-            refreshToken ? "authenticated" : "unauthenticated",
-          );
-        }
-      } catch {
-        if (active) {
-          setStatus("unauthenticated");
-        }
+        await tokenStorage.clear();
+      } finally {
+        setStatus("unauthenticated");
       }
     }
-  })();
-
-  return () => {
-    active = false;
-  };
-}, []);
+  }, []);
 
   return (
     <SessionContext.Provider
