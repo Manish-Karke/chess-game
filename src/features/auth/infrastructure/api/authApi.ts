@@ -94,22 +94,25 @@ export async function verifyEmailRequest(input: {
     return { message: body.message };
 }
 
+
+export class RefreshRejectedError extends Error {
+  constructor() {
+    super("Your session has expired. Please log in again.");
+    this.name = "RefreshRejectedError";
+  }
+}
+
 export async function loginRequest(
   input: LoginUserInput,
 ): Promise<LoginUserResult> {
-  const response = await fetch(
-    `${API_BASE_URL}/auth/login`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: input.email.trim().toLowerCase(),
-        password: input.password,
-      }),
-    },
-  );
+  const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      email: input.email.trim().toLowerCase(),
+      password: input.password,
+    }),
+  });
 
   const body: unknown = await response.json().catch(() => null);
 
@@ -134,10 +137,14 @@ export async function loginRequest(
     body === null ||
     !("accessToken" in body) ||
     typeof body.accessToken !== "string" ||
+    !("refreshToken" in body) ||
+    typeof body.refreshToken !== "string" ||
     !("tokenType" in body) ||
     body.tokenType !== "Bearer" ||
     !("expiresIn" in body) ||
     typeof body.expiresIn !== "number" ||
+    !("refreshExpiresIn" in body) ||
+    typeof body.refreshExpiresIn !== "number" ||
     !("user" in body) ||
     typeof body.user !== "object" ||
     body.user === null ||
@@ -155,10 +162,91 @@ export async function loginRequest(
     accessToken: body.accessToken,
     tokenType: "Bearer",
     expiresIn: body.expiresIn,
+    refreshToken: body.refreshToken,
+    refreshExpiresIn: body.refreshExpiresIn,
     user: {
       id: body.user.id,
       email: body.user.email,
       username: body.user.username,
     },
   };
+}
+
+export type RefreshSessionResult = LoginUserResult;
+
+export async function refreshRequest(
+  refreshToken: string,
+): Promise<RefreshSessionResult> {
+  const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ refreshToken }),
+  });
+
+  const body: unknown = await response.json().catch(() => null);
+
+ 
+   if (response.status === 401) {
+    throw new RefreshRejectedError();
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      `Unable to refresh your session (HTTP ${response.status}).`,
+    );
+  }
+
+
+  if (
+    typeof body !== "object" ||
+    body === null ||
+    !("accessToken" in body) ||
+    typeof body.accessToken !== "string" ||
+    !("refreshToken" in body) ||
+    typeof body.refreshToken !== "string" ||
+    !("tokenType" in body) ||
+    body.tokenType !== "Bearer" ||
+    !("expiresIn" in body) ||
+    typeof body.expiresIn !== "number" ||
+    !("refreshExpiresIn" in body) ||
+    typeof body.refreshExpiresIn !== "number" ||
+    !("user" in body) ||
+    typeof body.user !== "object" ||
+    body.user === null ||
+    !("id" in body.user) ||
+    typeof body.user.id !== "string" ||
+    !("email" in body.user) ||
+    typeof body.user.email !== "string" ||
+    !("username" in body.user) ||
+    typeof body.user.username !== "string"
+  ) {
+    throw new Error("Unexpected refresh response from server.");
+  }
+
+  return {
+    accessToken: body.accessToken,
+    tokenType: "Bearer",
+    expiresIn: body.expiresIn,
+    refreshToken: body.refreshToken,
+    refreshExpiresIn: body.refreshExpiresIn,
+    user: {
+      id: body.user.id,
+      email: body.user.email,
+      username: body.user.username,
+    },
+  };
+}
+
+export async function logoutRequest(
+  refreshToken: string,
+): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/auth/logout`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ refreshToken }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Unable to revoke the server session.");
+  }
 }

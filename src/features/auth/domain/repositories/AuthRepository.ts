@@ -27,16 +27,20 @@ export type LoginUserInput = {
   password: string;
 };
 
+
 export type LoginUserResult = {
   accessToken: string;
   tokenType: "Bearer";
   expiresIn: number;
+  refreshToken: string;
+  refreshExpiresIn: number;
   user: {
     id: string;
     email: string;
     username: string;
   };
 };
+
 
 export interface AuthRepository {
   register(
