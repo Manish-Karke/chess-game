@@ -21,6 +21,7 @@ type SessionStatus = "loading" | "authenticated" | "unauthenticated";
 type SessionContextValue = {
   status: SessionStatus;
   refreshSession: () => Promise<void>;
+  markAuthenticated: () => void;
   logout: () => Promise<void>;
 };
 
@@ -34,7 +35,9 @@ export function SessionProvider({
   children: React.ReactNode;
 }) {
   const [status, setStatus] = useState<SessionStatus>("loading");
-
+const markAuthenticated = useCallback(() => {
+  setStatus("authenticated");
+}, []);
   // Restore the session once when the app starts.
   useEffect(() => {
     let active = true;
@@ -137,11 +140,11 @@ export function SessionProvider({
   }, []);
 
   return (
-    <SessionContext.Provider
-      value={{ status, refreshSession, logout }}
-    >
-      {children}
-    </SessionContext.Provider>
+<SessionContext.Provider
+  value={{ status, refreshSession, markAuthenticated, logout }}
+>
+  {children}
+</SessionContext.Provider>
   );
 }
 
