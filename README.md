@@ -1,56 +1,185 @@
-# Welcome to your Expo app 👋
+# ? Chess App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**Full-stack chess app with real-time play and a digital store.**
 
-## Get started
+- ?? **Real-time chess** � local, vs computer, and online matchmaking over WebSockets (Socket.io)
+- ?? **Digital store** � buy PDF & course products (Khalti payments), download PDFs with a paid entitlement, admin tools to publish products and upload PDFs
+- ?? **Auth** � email verification, JWT access + rotating refresh tokens, session restore on app start
 
-1. Install dependencies
+> This repository is the **frontend** (Expo / React Native). The backend lives in the sibling folder `D:\chess server\server` (Node.js + Express + Prisma + Neon + Supabase + Khalti).
 
-   ```bash
-   npm install
-   ```
+---
 
-2. Start the app
+## Quick start
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+### 1. Backend (chess server)
 
 ```bash
-npm run reset-project
+cd "D:\chess server\server"
+npm install
+cp .env.example .env          # Neon, Resend, JWT, Khalti (sandbox), Supabase keys
+npx prisma migrate deploy
+npx prisma generate
+npm run dev                   # http://localhost:3000
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### 2. Frontend (chess app)
 
-### Other setup steps
+```bash
+cd D:\chess-app
+npm install
+npm run web                   # http://localhost:8081 (or expo start)
+# or: npm run android | ios  # native builds
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+The app talks to the backend at `https://server-1-teud.onrender.com` (configurable in `src/shared/api/apiClient.ts`).
 
-## Learn more
+---
 
-To learn more about developing your project with Expo, look at the following resources:
+## Project structure
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```
+chess-app                            # this repo (Expo / React Native)
++-- app/                             # file-based routing (expo-router)
+�   +-- (auth)/login.tsx, register.tsx, verify-email.tsx
+�   +-- home.tsx                     # landing screen (games + Store menu item)
+�   +-- game.tsx                     # local / computer / online game router
+�   +-- store/                       # ?? BROWSE PRODUCTS (new)
+�   +-- store/[id]/                  #   ?? PRODUCT DETAIL
+�   +-- store/[id]/buy/              #   ?? BUY (Khalti checkout + verify)
+�   +-- library.tsx                  #   ?? MY LIBRARY (paid PDFs)
+�   +-- payment/success.tsx, failure.tsx   #   ?? PAYMENT RESULTS
+�   +-- admin/products.tsx, create.tsx, [id]/upload   #   ?? ADMIN (sell)
+�   +-- ...
++-- src/
+�   +-- features/
+�   �   +-- auth/                    # login / register / email verification / session
+�   �   +-- chess/                   # real-time chess engine, sockets, UI
+�   �   +-- store/                   # ?? domain-driven store feature (new)
+�   �       +-- domain/{repositories,schemas,useCases}
+�   �       +-- infrastructure/api/storeApi.ts   # HTTP client + defensive parsers
+�   �       +-- di/storeFactory.ts
+�   +-- shared/api/apiClient.ts      # base URL + auth headers + 401 retry
+�   +-- app/                         # expo-router routes (root layout)
++-- ...
+```
 
-## Join the community
+---
 
-Join our community of developers creating universal apps.
+## Store / buy & sell features (new)
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+| Route                         | What it does                                                      |
+| ----------------------------- | ----------------------------------------------------------------- |
+| `/store`                      | Browse published PDF & course products (NPR pricing)              |
+| `/store/[id]`                 | Product detail � Buy Now                                          |
+| `/store/[id]/buy`             | Create order ? Khalti checkout ? **Verify Payment** ? entitlement |
+| `/library`                    | Paid PDFs; one-tap download (Supabase signed URL, 120 s)          |
+| `/admin/products`             | Admin product list                                                |
+| `/admin/products/create`      | Create a draft product (PDF or Course)                            |
+| `/admin/products/[id]/upload` | Upload the PDF file for a product                                 |
+
+**Payment flow:** `POST /orders` ? `POST /payments/khalti/initiate` ? open `paymentUrl` ? `POST /payments/khalti/verify` (server-side) ? on success the entitlement is granted and the PDF unlocks.
+
+---
+
+## API contract (server)
+
+### Auth
+
+| Method | Path                 | Protected |
+| ------ | -------------------- | --------- |
+| POST   | `/auth/register`     | �         |
+| POST   | `/auth/verify-email` | �         |
+| POST   | `/auth/login`        | �         |
+| POST   | `/auth/refresh`      | �         |
+| POST   | `/auth/logout`       | �         |
+
+### Store / payments
+
+| Method | Path                            | Protected | Admin |
+| ------ | ------------------------------- | --------- | ----- |
+| GET    | `/products`                     | �         | �     |
+| GET    | `/products/:id`                 | �         | �     |
+| POST   | `/orders`                       | ?         | �     |
+| POST   | `/payments/khalti/initiate`     | ?         | �     |
+| POST   | `/payments/khalti/verify`       | ?         | �     |
+| GET    | `/payments/khalti/return?pidx=` | �         | �     |
+| POST   | `/products`                     | ?         | ?     |
+| POST   | `/products/:id/pdf`             | ?         | ?     |
+| GET    | `/products/:id/pdf/download`    | ?         | �     |
+
+(Server auth uses a Bearer JWT; admin routes additionally require `role === "ADMIN"`.)
+
+---
+
+## API contract (server)
+
+### Auth
+
+| Method | Path                 | Protected |
+| ------ | -------------------- | --------- |
+| POST   | `/auth/register`     | �         |
+| POST   | `/auth/verify-email` | �         |
+| POST   | `/auth/login`        | �         |
+| POST   | `/auth/refresh`      | �         |
+| POST   | `/auth/logout`       | �         |
+
+### Store / payments
+
+| Method | Path                            | Protected | Admin |
+| ------ | ------------------------------- | --------- | ----- |
+| GET    | `/products`                     | �         | �     |
+| GET    | `/products/:id`                 | �         | �     |
+| POST   | `/orders`                       | ?         | �     |
+| POST   | `/payments/khalti/initiate`     | ?         | �     |
+| POST   | `/payments/khalti/verify`       | ?         | �     |
+| GET    | `/payments/khalti/return?pidx=` | �         | �     |
+| POST   | `/products`                     | ?         | ?     |
+| POST   | `/products/:id/pdf`             | ?         | ?     |
+| GET    | `/products/:id/pdf/download`    | ?         | �     |
+
+(Server auth uses a Bearer JWT; admin routes additionally require `role === "ADMIN"`.)
+
+---
+
+## Environment variables
+
+### Frontend
+
+No `.env` is required at runtime. The backend base URL is configured in `src/shared/api/apiClient.ts` (`https://server-1-teud.onrender.com`). To support multiple environments, move it to `EXPO_PUBLIC_API_BASE_URL` in `app.json` or `env`.
+
+### Backend (`D:\chess server\server`), copy `.env.example` ? `.env`
+
+| Variable                                                               | Purpose                        |
+| ---------------------------------------------------------------------- | ------------------------------ |
+| `DATABASE_URL`, `DATABASE_URL_UNPOOLED`                                | Neon PostgreSQL                |
+| `RESEND_API_KEY`, `EMAIL_FROM`                                         | Verification emails            |
+| `JWT_SECRET`                                                           | Access + refresh token signing |
+| `PORT`                                                                 | `3000`                         |
+| `KHALTI_SECRET_KEY`, `KHALTI_BASE_URL`, `KHALTI_RETURN_URL`            | Khalti sandbox/live            |
+| `APP_WEBSITE_URL`                                                      | Redirect target after payment  |
+| `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_STORAGE_BUCKET` | PDF storage                    |
+
+> Never commit `.env` � it is gitignored.
+
+---
+
+## Development
+
+```bash
+npm run lint              # expo lint
+npx tsc --noEmit          # frontend type check
+cd "D:\chess server\server"
+npx prisma migrate dev    # backend DB changes
+```
+
+## Deployment
+
+- **Frontend:** `npm run web` (static export) or native dev clients (Android / iOS). CORS allow-list your app origin in production.
+- **Backend:** `yarn build && yarn start` (Render example in `server/.env.example`).
+
+---
+
+## License
+
+ISC � see the backend `LICENSE`.

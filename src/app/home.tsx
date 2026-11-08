@@ -86,6 +86,10 @@ export default function HomeScreen() {
         router.push("/online-matchmaking");
     };
 
+    const handleOpenStore = () => {
+        router.push("/store");
+    };
+
     const handleLogout = async () => {
         if (loggingOut) return;
 
@@ -213,6 +217,13 @@ export default function HomeScreen() {
                                 subtitle="Find an opponent and play online"
                                 icon="globe-outline"
                                 onPress={handlePlayOnline}
+                            />
+
+                            <MenuItem
+                                title="Store"
+                                subtitle="Buy and sell chess PDFs & courses"
+                                icon="book-outline"
+                                onPress={handleOpenStore}
                             />
                         </View>
 

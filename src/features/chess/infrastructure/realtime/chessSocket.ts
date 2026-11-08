@@ -1,8 +1,7 @@
-import { tokenRefreshService } from "@/features/auth/infrastructure/api/TokenRefreshService";
-import { SessionExpiredError } from "@/features/auth/infrastructure/api/TokenRefreshService";
+import { SessionExpiredError, tokenRefreshService } from "@/features/auth/infrastructure/api/TokenRefreshService";
 import { io, Socket } from "socket.io-client";
 
-const SERVER_URL = "https://server-5-5h5o.onrender.com";
+const SERVER_URL = "https://server-1-teud.onrender.com";
 
 export const chessSocket: Socket = io(SERVER_URL, {
     autoConnect: false,
