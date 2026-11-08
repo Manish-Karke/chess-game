@@ -226,10 +226,13 @@ export async function uploadProductPdf(productId: string, file: {
 }
 
 
-export async function getProductPdfDownloadUrl(productId: string) {
+export async function getProductPdfDownloadUrl(
+  productId: string,
+): Promise<string> {
   const body = await apiRequest<unknown>(
     `/products/${encodeURIComponent(productId)}/pdf/download`,
   );
-  return parseDownloadUrl(body);
+
+  return parseDownloadUrl(normalizeData(body));
 }
 
